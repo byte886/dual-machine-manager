@@ -51,7 +51,7 @@
 两台同步共三把：`id_rsa`（Web3Stack404/云服务器）、`id_ed25519`（tinyverse）、`id_rsa_softwawrecheng`（byte886 主力，文件名历史拼写勿改）。
 
 - 所有私钥应交由 ssh-agent + macOS 钥匙串，首次输 passphrase 后免重复输入。
-- **实测状态（2026-09-15）**：.8 ssh-agent 已加载 3 把；**.9 ssh-agent 加载 0 把（遗留待修，修复 SOP 见 security-and-git.md 第三节）**。
+- **实测状态（2026-09-15）**：两机 ssh-agent 均已加载 3 把（.9 当日修复，见 [security-and-git.md](security-and-git.md) 第二、三节）；其中主力 `id_rsa_softwawrecheng` 两机一致，ed25519/id_rsa 两机指纹不同（待用户决策是否对齐）。
 - 双机互配公钥免密（`ssh wj` / `ssh cw`），云服务器（root）已配公钥。
 
 ---
@@ -61,7 +61,7 @@
 ### 当前主力 PAT（账号 byte886）
 - **类型/有效期**：classic token，**No expiration（永不过期）**，供长期自动化；账号级全权限（21 个顶层 scope，页面子权限被父权限隐含，最终等价全选，属正常）。
 - **加密落点（双机同路径、仓库外、永不入库）**：`~/.doubao/secrets/github_pat.enc`（两机均 90B，统一主口令一致、密文可互拷；目录 700、文件 600）。
-- **加解密工具**：全局命令 `secrets`（软链到 mac-system-toolkit `scripts/secrets.sh`；算法 aes-256-cbc + pbkdf2 + base64 固定不改，保证双机/新旧密文互解）。
+- **加解密工具**：全局命令 `secrets`（由 mac-system-toolkit 安装提供；算法 aes-256-cbc + pbkdf2 + base64 固定不改，保证双机/新旧密文互解）。
 
 ### 取用与 gh 登录（标准命令，取—用—弃）
 ```bash

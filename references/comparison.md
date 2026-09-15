@@ -26,7 +26,7 @@
 | **IDE** | VS Code(14 扩展) + Android Studio + IntelliJ + WebStorm + emacs + Codex | VS Code(无 CLI) + Trae + Xcode |
 | **软件数量** | ~130 个应用 | ~70 个应用 |
 | **GitHub 账号** | 三账号 SSH 分流（byte886/tinyverse/web3） | 单账号（主力） |
-| **ssh-agent** | ✅ 3 把密钥常驻 | 🔴 未运行（仍待修） |
+| **ssh-agent** | ✅ 3 把常驻（launchd+钥匙串） | ✅ 已修复常驻（2026-09-15，launchd+钥匙串+`.zshenv`） |
 | **git credential** | 正常（主仓走 SSH，不用 helper） | gh helper 配置在、gh 已装于 /usr/local/bin；主仓走 SSH 实际不依赖 |
 | **硬件** | i5-1260K / 64G / 1TB NVMe | i5-13600KF / 128G / 4TB NVMe + 16TB HDD |
 | **内存压力** | 🔴 偏高（64G 易占满，以 top 实测为准） | 128G，占用以 top 实测为准（盘点时约 119G） |
@@ -56,11 +56,12 @@
 | 软件 | 按角色选配：本机全能，远程机加微信多开/Warp/Devin/Macs Fan Control |
 | GitHub 账号分流 | 仅本机配三账号，远程机单主力账号 |
 
-### 3.3 需修复的不对称
+### 3.3 不对称项现状
 
-| 项 | 机器 | 修复 |
+| 项 | 机器 | 状态 / 处理 |
 |---|---|---|
-| ssh-agent 未运行（仍存在） | 远程机 | `ssh-add --apple-use-keychain ~/.ssh/id_*` + launchd 自启，见 security-and-git.md 第三节 |
+| ~~ssh-agent 未运行~~ | 远程机 | ✅ 已修复（2026-09-15）：launchd agent + 钥匙串 + `.zshenv` 持久化，见 security-and-git.md 第三节 |
+| **ed25519 / id_rsa 两机指纹不一致** | 两机 | ⚠️ 待用户决策以哪台为准再经安全渠道同步；主力 key 一致、不影响 GitHub，见 security-and-git.md 第二节 |
 | ~~credential helper 失效~~ | 远程机 | 已随 gh 安装（/usr/local/bin/gh）自行解决；主仓走 SSH，无需再处理 |
 
 ---

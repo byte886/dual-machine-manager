@@ -17,12 +17,12 @@
 
 ---
 
-## 二、🔴 需优先处理（4 项）
+## 二、🔴 需优先处理（现存 2 项；#2/#3 已解决留档）
 
 | # | 问题 | 机器 | 说明 | 修复建议 |
 |---|---|---|---|---|
 | 1 | **内存长期占满** | 本机 cw | 64G 物理内存常被吃满（实测仅剩百余 MB），Parallels/IDE 全家桶是大户 | `top -o mem` 排序定位；关闭闲置 VM/IDE，必要时重启 |
-| 2 | **远程机 ssh-agent 未运行** | 远程机 wj | `SSH_AUTH_SOCK` 为空，密钥未加载 | `eval $(ssh-agent) && ssh-add --apple-use-keychain ~/.ssh/id_*` 并配 launchd 自启（详见 security-and-git.md 第三节） |
+| 2 | ~~远程机 ssh-agent 未运行~~ | 远程机 wj | **已解决（2026-09-15）**：launchd agent + 存入钥匙串 + `.zshenv` 持久化 SOCK，非交互 `ssh wj 'ssh-add -l'` 可见 3 把、GitHub 认证正常 | 见 security-and-git.md 第三节，留档 |
 | 3 | ~~远程机 credential helper 失效~~ | 远程机 wj | **已解决**：gh 已装于 /usr/local/bin、helper 有效；主仓走 SSH 本就不依赖 | 无需处理，留档 |
 | 4 | **iOS 模拟器卷 98% 满（仍存在）** | 本机 cw | CoreSimulator 约 22G 卷实测仅剩约 551M | `xcrun simctl delete unavailable` 清理旧模拟器；必要时 `xcrun simctl purge -s all` |
 
@@ -37,7 +37,7 @@
 | 7 | ~/Doubao 体积大 | 远程机 wj | 远程 Home 最大户，`du -sh ~/*` 看是否缓存/历史会话可清 |
 | 8 | Load Average 偏高 | 两台 | 多核下 load 高但仍有 idle 属正常，结合 idle% 判断 |
 | 9 | 两台均无 GPG 签名 | 两台 | Git commit 未做 GPG 签名（需要时再配） |
-| 10 | 两台均无独立密码管理器 | 两台 | 凭据全靠 macOS 钥匙串 |
+| 10 | 网站密码未用独立密码管理器 | 两台 | 开发者凭证已走 `.enc` 加密体系；网站/App 密码是否上密码管理器由用户决定（方针见 security-baseline） |
 | 11 | 系统待更新 | 两台 | 以 `softwareupdate -l` 实测为准，安全更新优先 |
 
 ---

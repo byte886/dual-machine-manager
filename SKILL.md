@@ -37,7 +37,7 @@ compatibility: macOS（已验证：macOS 15.7.8 x86_64，两台机器均为 Mac�
 | [references/sop.md](references/sop.md) | 需要执行标准运维流程时 | 日常巡检、双机同步、服务管理、远程关机、故障排查、新工具接入、凭证轮换等 SOP |
 | [references/package-managers.md](references/package-managers.md) | 需要对比/安装/排障包管理器时 | 双机包管理工具对比（Homebrew/npm/pip3/gem/cargo/mise/pnpm/yarn/go/java/maven/gradle）、本机 formulae 分类、远程机 Homebrew 现状与非交互 SSH 的 PATH 坑、node/npm 来源、mise 作用、一致性维护建议 |
 | [references/ide-and-software.md](references/ide-and-software.md) | 需要盘点 IDE/软件时 | IDE/开发工具对比、本机 VS Code 扩展清单、远程 code CLI 现状、常用软件按分类双机对比（共有/仅本机/仅远程机） |
-| [references/security-and-git.md](references/security-and-git.md) | 需要处理 SSH/密钥/钥匙串/Git/GitHub 多账号、gh 登录态时 | SSH 配置对比、本机已加载密钥指纹、远程机 ssh-agent 未运行修复 SOP、钥匙串/GPG/密码管理器状态、Git 工具与 gh 版本对比、远程机 git credential helper、GitHub 账号体系（SSH 分流 / gh 登录态 / 提交身份三者分工） |
+| [references/security-and-git.md](references/security-and-git.md) | 需要处理 SSH/密钥/钥匙串/Git/GitHub 多账号、gh 登录态时 | SSH 配置对比、双机已加载密钥指纹对照、远程机 ssh-agent 修复记录与通用 SOP、钥匙串/GPG/密码管理器状态、Git 工具与 gh 版本对比、远程机 git credential helper、GitHub 账号体系（SSH 分流 / gh 登录态 / 提交身份三者分工） |
 | [references/health.md](references/health.md) | 需要看机器健康度/磁盘/内存/巡检命令时 | 资源占用对比、🔴4 个优先问题、🟡关注项、🟢健康项、磁盘详情、Home 目录大户、系统更新、只读巡检命令清单 |
 | [references/comparison.md](references/comparison.md) | 需要理解双机定位/差异/一致性策略时 | 双机定位总结、全维度差异总表、必须一致/允许差异/需修复不对称、双机同步 SOP、新工具双机决策流程 |
 

@@ -12,7 +12,7 @@
 | SSH 版本 | OpenSSH_9.9p2, LibreSSL 3.3.6 | OpenSSH_9.9p2, LibreSSL 3.3.6 |
 | 私钥数量 | 3 把：`id_ed25519`、`id_rsa`、`id_rsa_softwawrecheng` | 3 把：同名三把（已同步） |
 | 公钥数量 | 3 个 `.pub` | 3 个 `.pub` |
-| **ssh-agent 状态** | ✅ **3 把密钥已加载**（2026-09-15 实测） | 🔴 **加载 0 把、仍待修**（2026-09-15 `ssh-add -l` 实测，修复见第三节） |
+| **ssh-agent 状态** | ✅ 3 把常驻（launchd agent + 钥匙串） | ✅ **已修复（2026-09-15）**：launchd agent + 存入钥匙串 + `.zshenv` 持久化 SOCK，非交互 `ssh wj 'ssh-add -l'` 可见 3 把，详见第三节 |
 | SSH_AUTH_SOCK | ✅ 已设（launchd listener） | ❌ 空 |
 | 钥匙串 | login.keychain-db + System.keychain（默认 login） | login.keychain-db + System.keychain（默认 login） |
 | GPG | ❌ 未安装 | ❌ 未安装 |
@@ -22,44 +22,59 @@
 
 ---
 
-## 二、本机 ssh-agent 已加载密钥（仅指纹，不明文）
+## 二、ssh-agent 已加载密钥双机对照（仅指纹，不明文；2026-09-15 实测）
 
-```
-4096 SHA256:5tkXaJcDPgE8Kaix7T25cj2uFnkTjbmwBJPyeeHqkhk  softwawrecheng@github (RSA)
-256  SHA256:EZbyOb7Sgro/7W9vOGLSgeJ+xCBug+twG/doBGtv9Cs  dev@tinyverse.space (ED25519)
-4096 SHA256:Qk9xb0gPN1Wa02NojIIlf35RnKG7j1aW0bNJZTBC4Ko  softwarecheng@126.com (RSA)
-```
+| 私钥文件 | .8 本机 cw 指纹 | .9 远程 wj 指纹 | 是否一致 |
+|---|---|---|---|
+| `id_rsa_softwawrecheng`（byte886 主力，git/GitHub 走它） | `5tkXaJcDPgE8Kaix7T25cj2uFnkTjbmwBJPyeeHqkhk` (RSA4096) | `5tkXaJcDPgE8Kaix7T25cj2uFnkTjbmwBJPyeeHqkhk` (RSA4096) | ✅ 一致 |
+| `id_ed25519`（tinyverse） | `EZbyOb7Sgro/7W9vOGLSgeJ+xCBug+twG/doBGtv9Cs`（注释 dev@tinyverse.space） | `pvBKozCGHiN+PkCOySySPsihLzDVMAzj0lWhztG+cNE`（注释 **compress-migration-20260914**） | ⚠️ **不一致** |
+| `id_rsa`（web3/云服务器） | `Qk9xb0gPN1Wa02NojIIlf35RnKG7j1aW0bNJZTBC4Ko` | `zRwiw53qLKX4ikNORrrh+TIoC2ZPiQ2UPDEKw3k7ZC0` | ⚠️ **不一致** |
+
+> ⚠️ **待用户决策（不擅自覆盖私钥）**：主力 key 两机一致、GitHub 免密正常；但 ed25519 / id_rsa 两机并非同一把（.9 的 ed25519 是 2026-09-14 迁移期产物）。若 .9 要用这两把登录对应服务器/账号，需确认以哪台为准再经安全渠道同步私钥；在用户拍板前保持现状、不覆盖。
 
 ---
 
-## 三、🔴 远程机 ssh-agent 未运行 — 修复 SOP
+## 三、远程机 ssh-agent 修复记录与通用 SOP（已于 2026-09-15 修复）
 
-### 问题
-远程机 `SSH_AUTH_SOCK` 为空，agent 未运行（`Could not open a connection to your authentication agent`）。当前免密依赖 ControlMaster 复用连接；但 agent 重启或新连接时，私钥口令无法走钥匙串自动注入，可能突然要求输密码。
+### 当时的问题根因（两层）
+1. launchd 托管的 `com.openssh.ssh-agent` 进程其实在跑，但非交互/`ssh wj '<cmd>'` 会话里 `SSH_AUTH_SOCK` 为空，于是报 `Could not open a connection to your authentication agent`；
+2. 三把私钥的 passphrase 从没存进该机器钥匙串，即使接上 agent 仍会交互要口令。
 
-### 修复步骤
+### 实际采用的修复（已验证，主口令不进命令行/进程参数/日志）
 
 ```bash
 ssh wj
-# 1. 启动 agent 并把已同步的三把私钥加载进钥匙串
-eval $(ssh-agent)
-ssh-add --apple-use-keychain ~/.ssh/id_rsa_softwawrecheng ~/.ssh/id_ed25519 ~/.ssh/id_rsa
+# 1) 取 launchd agent 的 listener socket（进程本就在跑，无需手动 eval ssh-agent）
+SOCK=$(launchctl print gui/$(id -u)/com.openssh.ssh-agent \
+  | awk '/path = \/private\/tmp.*Listeners/{print $3; exit}')
 
-# 2. 验证
-ssh-add -l          # 应列出 3 把密钥指纹
-echo $SSH_AUTH_SOCK # 应非空
+# 2) 用临时 SSH_ASKPASS 从本机 600 权限 master.pass 读 passphrase（不回显、用完即删），
+#    --apple-use-keychain 同时把 passphrase 存入钥匙串，三把分别加载
+ASK=$(mktemp /tmp/.askpass.XXXXXX)
+printf '#!/bin/sh\ncat "$HOME/.doubao/secrets/master.pass"\n' > "$ASK"; chmod 700 "$ASK"
+for k in id_rsa_softwawrecheng id_ed25519 id_rsa; do
+  SSH_AUTH_SOCK="$SOCK" SSH_ASKPASS="$ASK" SSH_ASKPASS_REQUIRE=force \
+    ssh-add --apple-use-keychain "$HOME/.ssh/$k"
+done
+rm -f "$ASK"
+SSH_AUTH_SOCK="$SOCK" ssh-add -l     # 列出指纹即成功
 ```
 
-### 配置 launchd 开机自启（避免重启后又丢）
+### 持久化：让非交互会话也能连到 agent（关键，否则重启/新 ssh 又空）
 
-在远程机创建 `~/Library/LaunchAgents/` 下的 plist，让 ssh-agent 随登录启动（macOS 上 ssh-agent 通常由 launchd 自动拉起 listener；若未拉起，需确认 `~/.ssh/config` 含：）
+zsh 的非交互会话不读 `.zshrc`、只读 `.zshenv`，故把下面这段写进远程机 `~/.zshenv`（幂等，已配置）：
 
+```sh
+# launchd-openssh-agent-socket
+if [ -z "$SSH_AUTH_SOCK" ]; then
+  _asock=$(launchctl print gui/$(id -u)/com.openssh.ssh-agent 2>/dev/null \
+    | awk '/path = \/private\/tmp.*Listeners/{print $3; exit}')
+  [ -S "$_asock" ] && export SSH_AUTH_SOCK="$_asock"
+  unset _asock
+fi
 ```
-AddKeysToAgent yes
-UseKeychain yes
-```
 
-并把密钥口令存入钥匙串后，开机即可自动加载，无需每次手动 `ssh-add`。
+前提：`~/.ssh/config` 的 `Host *` 含 `AddKeysToAgent yes` 与 `UseKeychain yes`（已配）。此后 passphrase 在钥匙串、agent 由 launchd 拉起、SOCK 由 `.zshenv` 接上，三重保证免重复输；验证 `ssh wj 'ssh-add -l'` 直接列指纹、`ssh wj 'ssh -T git@github.com'` 回 `Hi byte886!`。
 
 ---
 
@@ -150,7 +165,7 @@ UseKeychain yes
 
 ## 九、维护建议
 
-1. **优先修远程机 ssh-agent**（第三节）——这是当前唯一仍存在的不对称项；credential helper 已随 gh 安装解决（见第六节）。
+1. ~~远程机 ssh-agent 未运行~~ **已修复（2026-09-15，见第三节）**；当前唯一遗留的密钥不对称是 ed25519 / id_rsa 两机指纹不同（见第二节表，待用户决策是否对齐，不擅自覆盖私钥）。credential helper 已随 gh 安装解决（见第六节）。
 2. **git 用户配置两台保持一致**（已是 softwarecheng / softwarecheng@126.com），不要在某台单独改。
 3. **GitHub 多账号只在本机**，远程机不补分流，符合其单账号定位。
 4. **如需 GPG 签名**：仅本机 `brew install gnupg`，远程机不跟进（其只做主力账号提交，签名策略由本机决定）。
