@@ -13,7 +13,7 @@
 | 私钥数量 | 3 把：`id_ed25519`、`id_rsa`、`id_rsa_softwawrecheng` | 3 把：同名三把（已同步） |
 | 公钥数量 | 3 个 `.pub` | 3 个 `.pub` |
 | **ssh-agent 状态** | ✅ 3 把常驻（launchd agent + 钥匙串） | ✅ **已修复（2026-09-15）**：launchd agent + 存入钥匙串 + `.zshenv` 持久化 SOCK，非交互 `ssh wj 'ssh-add -l'` 可见 3 把，详见第三节 |
-| SSH_AUTH_SOCK | ✅ 已设（launchd listener） | ❌ 空 |
+| SSH_AUTH_SOCK | ✅ 已设（launchd listener） | ✅ 已设（`.zshenv` 接到 launchd listener，非交互会话也有，见第三节） |
 | 钥匙串 | login.keychain-db + System.keychain（默认 login） | login.keychain-db + System.keychain（默认 login） |
 | GPG | ❌ 未安装 | ❌ 未安装 |
 | 密码管理器 | ❌ 无 1Password/Bitwarden/KeePass | ❌ 无 |
@@ -139,6 +139,7 @@ fi
 
 - **远程机**：仅主力单账号，走 `id_rsa_softwawrecheng:443`，无分流别名。
 - **含义**：跨账号仓库操作只在本机做；主力账号仓库两机均可提交/push。
+- **2026-09-16 实测三别名均有效**：`github.com`→byte886、`github-tinyverse`→tinyverse、`github-web3`→Web3Stack404 全部认证成功，三把私钥在 GitHub 侧均有效，无失效 key。
 
 ### gh 登录态、SSH 分流、提交身份是三件事（别混）
 
@@ -158,8 +159,21 @@ fi
 
 ## 八、SSH config 其他要点
 
-- **本机**：全局 `AddKeysToAgent yes / UseKeychain yes`；7 台云服务器；`wj` 别名 + ControlMaster 连接复用（10m）。
-- **远程机**：`cw` 别名 + ControlMaster；内网服务器经 `ProxyJump root@103.103.245.177:8020` 跳转。
+- **本机**：全局 `AddKeysToAgent yes / UseKeychain yes`；公网云服务器 3 台 + 局域网 `192.168.10.x` 4 台；`wj` 别名 + ControlMaster 连接复用（10m）。
+- **远程机**：`cw` 别名 + ControlMaster；原设计内网服务器经 `ProxyJump root@103.103.245.177:8020` 跳转（该跳板 2026-09-16 实测不可达，见下表，待确认）。
+
+### 云服务器与清理台账（2026-09-16 实测）
+
+| 主机 | .8 config | .9 config | 22 实测 | 结论 |
+|---|---|---|---|---|
+| `39.108.96.46`（阿里云 ECS `iZwz9f1s7aknuxsng8pa9kZ`，Ubuntu 5.4 内核） | 有 | 无（按需补） | 🟢 OPEN，两机新 key 均能公钥登录 | 在用，保留 |
+| `103.234.53.68` | 有 | 无 | 🔴 超时/无路由 | 待确认是否已退役，确认后删 config |
+| `103.103.245.177`（原内网 ProxyJump 跳板） | 有 | 有 | 🔴 超时/无路由 | 同上；其不可达会使 .9 经它的 ProxyJump 失效 |
+| `192.168.10.101~104` | 4 条 | 3 条（缺 .102） | 当前在 192.168.2.x 网段、路由不到属正常，不判失效 | 保留 |
+
+- **ControlMaster 复用套接字不是垃圾**：`~/.ssh/cm-<user>@<host>:<port>`（如 `cm-wenjiechen@192.168.2.9:22`）是活动的多路复用 socket；`ssh -O check <别名>` 显示 `Master running` 即在用，勿当残留删，连接彻底关闭后按 ControlPersist 自动消失。
+- **已清理（2026-09-16）**：删除被现 config 完全取代、`diff` 确认无独有配置的历史快照——.8 `config.bak-byte886-20260915-114705`；.9 `config.bak-20260914-cm`、`config.bak-agent-20260915-121111`、`known_hosts.old`。
+- **.9 旧私钥留底**：`id_ed25519`/`id_rsa` 的 `*.migrated-bak-20260915`（含 .pub）是密钥对齐前旧版；在线的 39.108.96.46 已验证用新 key 可登，待两台不可达主机状态确认、无需旧 key 回退后再删。
 
 ---
 
@@ -169,3 +183,4 @@ fi
 2. **git 用户配置两台保持一致**（已是 softwarecheng / softwarecheng@126.com），不要在某台单独改。
 3. **GitHub 多账号只在本机**，远程机不补分流，符合其单账号定位。
 4. **如需 GPG 签名**：仅本机 `brew install gnupg`，远程机不跟进（其只做主力账号提交，签名策略由本机决定）。
+5. **待用户确认（不擅自删）**：`103.234.53.68` / `103.103.245.177` 两台云主机是否已退役——确认退役则删两机对应 config Host（并清 .9 的 `.migrated-bak` 旧私钥）；仍在用则保留，待其网络可达时复核。
