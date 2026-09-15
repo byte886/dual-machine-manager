@@ -187,8 +187,8 @@ rm -rf ~/Library/Caches/*
 |---|---|
 | sudo 密码 | 系统设置 → 用户与群组 → 修改密码；两台机器分别改 |
 | SSH 密钥 | `ssh-keygen` 生成新密钥 → 更新 `~/.ssh/config` → 分发公钥到所有服务器 → 退役旧密钥 |
-| GitHub PAT | GitHub Settings → Developer settings → Personal access tokens → 生成新 token → 更新加密存储 → 退役旧 token |
+| GitHub PAT | GitHub Settings → Developer settings → Personal access tokens (classic) 生成（全权限、No expiration）→ 加密覆盖写入 `~/.doubao/secrets/github_pat.enc` → **两机分别** `secrets decrypt … | gh auth login --with-token` → 网页删除旧 token（详见 credentials.md 第三节） |
 | 关机 Webhook token | 编辑远程机 plist 中的 `SHUTDOWN_TOKEN` → unload + load 重启服务 |
 | OpenToken webhook | 重新从官网获取安装命令 → 重新执行安装（覆盖配置） |
 
-轮换后必须：更新 credentials.md 中的位置说明、验证新凭证可用、退役旧凭证。
+轮换后必须：更新 credentials.md 中的位置说明、验证新凭证可用、退役旧凭证；其中 **GitHub PAT 还须双机都更新 `github_pat.enc` 并各自重新 `gh auth login --with-token`**（见 credentials.md 第三节）。

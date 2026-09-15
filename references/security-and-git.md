@@ -81,7 +81,7 @@ UseKeychain yes
 | git 版本 | 2.50.1（/usr/bin Apple git） | /usr/bin 为 2.39.5 Apple git，/usr/local/bin 另有 brew git 2.55；非交互默认走 /usr/bin |
 | user.name | softwarecheng | softwarecheng |
 | user.email | softwarecheng@126.com | softwarecheng@126.com |
-| **gh (GitHub CLI)** | ✅ `/usr/local/bin/gh` | ✅ `/usr/local/bin/gh`（2.98 已装；非交互 PATH 不含 /usr/local/bin 时用绝对路径） |
+| **gh (GitHub CLI)** | ✅ `/usr/local/bin/gh`（2.58.0） | ✅ `/usr/local/bin/gh`（2.98.0；非交互 PATH 不含 /usr/local/bin 时用绝对路径） |
 | lazygit / git-flow | ❌ 无 | ❌ 无 |
 | Git GUI 工具 | ❌ 无（无 GitHub Desktop/Sourcetree/Tower/Fork） | ❌ 无 |
 | 全局 hooksPath | 未设置 | 未设置 |
@@ -123,6 +123,20 @@ UseKeychain yes
 
 - **远程机**：仅主力单账号，走 `id_rsa_softwawrecheng:443`，无分流别名。
 - **含义**：跨账号仓库操作只在本机做；主力账号仓库两机均可提交/push。
+
+### gh 登录态、SSH 分流、提交身份是三件事（别混）
+
+| 维度 | 用什么 | 账号 / 身份 | 凭据来源 |
+|---|---|---|---|
+| git over SSH（子模块、各仓 push/pull） | SSH 密钥 | byte886 主力（tinyverse/web3 仅本机分流） | `~/.ssh/id_rsa_*` + ssh-agent / 钥匙串 |
+| git 提交署名 | `user.name` / `user.email` | softwarecheng \<softwarecheng@126.com\>，两机一致 | gitconfig，**与登录账号无关** |
+| **gh（GitHub CLI：API / 建仓 / HTTPS）** | PAT | **两机统一登录为 byte886（唯一 Active）** | 加密件 `~/.doubao/secrets/github_pat.enc` 解密后 `--with-token` 登录 |
+
+- 两机 gh 只保留 byte886 一个 Active 账号；token 已失效的历史账号用 `gh auth logout -h github.com -u <名> --force` 清掉，避免 gh 误选失效账号。
+- 非交互登录 / 刷新：`secrets decrypt "$HOME/.doubao/secrets/github_pat.enc" | gh auth login -h github.com --with-token`；用 `gh auth status`、`gh api user -q .login`（应回 byte886）验证。
+- 远程机非交互 SSH 下调 gh 先 `export PATH=/usr/local/bin:$PATH`（PATH 坑见 SKILL.md）。
+- gh 的 "Git operations protocol" 两机可为 https/ssh 不同值——仓库实际统一走 SSH，不受影响。
+- PAT 的 scope、有效期、加密落点、轮换细节见 credentials.md 第三节。
 
 ---
 

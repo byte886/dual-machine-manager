@@ -36,14 +36,37 @@
 
 ## 三、GitHub Personal Access Token (PAT)
 
-### 存储方式
-- **加密存储**，不明文保存
-- **解密主密码**：与系统统一主密码相同（值不入库，需要时由用户提供）
+### 当前主力 PAT（账号 byte886）
+- **类型 / 有效期**：classic token，**No expiration（永不过期）**，供长期自动化使用；账号级全权限（21 个顶层 scope：repo、workflow、admin:* 系列、user、gist、notifications、project、delete_repo、write:* 等。页面勾选时的子权限会被父权限隐含，GitHub 最终只保存"最小必要集"，权限等价全选，属正常）
+- **加密落点（双机同路径，仓库外、永不入库）**：`~/.doubao/secrets/github_pat.enc`
+  - 本机 cw：`$HOME/.doubao/secrets/github_pat.enc`（家目录名 chenwenjie）
+  - 远程 wj：`$HOME/.doubao/secrets/github_pat.enc`（家目录名 wenjiechen）
+  - 两台统一主密码一致，密文可直接互相拷贝解密；目录权限 700、文件 600
+- **加密/解密工具**：全局命令 `secrets`（权威源在 mac-system-toolkit，固定算法 aes-256-cbc + pbkdf2 + base64，不可改，保证双机/新旧密文互解）
+
+### 存储方式（通用规则）
+- **加密存储，不明文保存**：token 不进 git、不进脚本、不进 shell 历史；需要时现解密、仅在变量中短暂持有，用完 `unset`；不在日志/聊天回显完整值，最多显示 `ghp_xxxx…后4位`
+- **解密主密码**：与系统统一主密码相同（值不入库，需要时由用户提供，或读本机 600 权限的 `~/.doubao/secrets/master.pass`）
 - **常用话术**：「自动化获取 playwright token」（用户已记录为常用话术，触发时自动解密获取）
 
+### 取用与 gh 登录（标准命令）
+```bash
+# 解密到变量（不要 echo 全量）
+TOKEN="$(ENC_PASS='<统一主密码>' secrets decrypt "$HOME/.doubao/secrets/github_pat.enc")"
+# 非交互登录/刷新 gh（两台机器都登录为 byte886）
+printf '%s' "$TOKEN" | gh auth login -h github.com --with-token
+gh api user -q .login            # 应回 byte886
+unset TOKEN
+```
+
 ### 使用场景
+- `gh`（GitHub CLI）登录态：建仓、GitHub API、Release、Actions 等
 - 需要 GitHub API 认证的自动化脚本
-- Playwright 等工具的 token 获取
+- Playwright 等工具的 token 获取（「自动化获取 playwright token」话术）
+
+### 双机同步与轮换
+- PAT 更新后**两台机器都要改**：把新 `github_pat.enc` 经 scp 送到对端同路径，再各自重跑上面的 `gh auth login --with-token`；旧 token 到 GitHub 网页删除退役
+- 完整轮换 SOP 见 sop.md 第八节；新建 GitHub 仓默认 **public**（用户硬偏好）
 
 ---
 
