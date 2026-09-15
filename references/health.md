@@ -22,7 +22,7 @@
 | # | 问题 | 机器 | 说明 | 修复建议 |
 |---|---|---|---|---|
 | 1 | **内存长期占满** | 本机 cw | 64G 物理内存常被吃满（实测仅剩百余 MB），Parallels/IDE 全家桶是大户 | `top -o mem` 排序定位；关闭闲置 VM/IDE，必要时重启 |
-| 2 | ~~远程机 ssh-agent 未运行~~ | 远程机 wj | **已解决（2026-09-15）**：launchd agent + 存入钥匙串 + `.zshenv` 持久化 SOCK，非交互 `ssh wj 'ssh-add -l'` 可见 3 把、GitHub 认证正常 | 见 security-and-git.md 第三节，留档 |
+| 2 | ~~远程机 ssh-agent 未运行~~ | 远程机 wj | **已解决（2026-09-15）**：launchd agent + 存入钥匙串 + `.zshenv` 持久化 SOCK，非交互 `ssh wj 'ssh-add -l'` 可见 3 把、GitHub 认证正常 | 见 [ssh-keys-and-config.md](ssh-keys-and-config.md) 第三节，留档 |
 | 3 | ~~远程机 credential helper 失效~~ | 远程机 wj | **已解决**：gh 已装于 /usr/local/bin、helper 有效；主仓走 SSH 本就不依赖 | 无需处理，留档 |
 | 4 | **iOS 模拟器卷 98% 满（仍存在）** | 本机 cw | CoreSimulator 约 22G 卷实测仅剩约 551M | `xcrun simctl delete unavailable` 清理旧模拟器；必要时 `xcrun simctl purge -s all` |
 
@@ -118,4 +118,4 @@ softwareupdate -l
 du -sh ~/* | sort -rh | head
 ```
 
-- ssh-agent / git credential / 密钥身份的标准状态见本技能 security-and-git.md。
+- ssh-agent / 密钥身份的标准状态见 [ssh-keys-and-config.md](ssh-keys-and-config.md)；git credential / GitHub 账号体系见 [git-and-github-accounts.md](git-and-github-accounts.md)。

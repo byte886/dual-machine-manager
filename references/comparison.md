@@ -60,8 +60,8 @@
 
 | 项 | 机器 | 状态 / 处理 |
 |---|---|---|
-| ~~ssh-agent 未运行~~ | 远程机 | ✅ 已修复（2026-09-15）：launchd agent + 钥匙串 + `.zshenv` 持久化，见 security-and-git.md 第三节 |
-| ~~ed25519 / id_rsa 两机指纹不一致~~ | 两机 | ✅ 已对齐（2026-09-15 以 .8 为准；旧 `.migrated-bak` 留底已于 2026-09-16 随云主机退役一并删除），见 security-and-git.md 第二节 |
+| ~~ssh-agent 未运行~~ | 远程机 | ✅ 已修复（2026-09-15）：launchd agent + 钥匙串 + `.zshenv` 持久化，见 [ssh-keys-and-config.md](ssh-keys-and-config.md) 第三节 |
+| ~~ed25519 / id_rsa 两机指纹不一致~~ | 两机 | ✅ 已对齐（2026-09-15 以 .8 为准；旧 `.migrated-bak` 留底已于 2026-09-16 随云主机退役一并删除），见 [ssh-keys-and-config.md](ssh-keys-and-config.md) 第二节 |
 | ~~credential helper 失效~~ | 远程机 | 已随 gh 安装（/usr/local/bin/gh）自行解决；主仓走 SSH，无需再处理 |
 
 ---

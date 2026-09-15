@@ -9,7 +9,7 @@
 | 工具/场景 | 需要什么凭证 | 凭证来处 | 取用方式 / SOP |
 |---|---|---|---|
 | `gh`（建仓/API/PR/Release） | GitHub PAT（byte886，classic 全权限、永不过期） | 全局 `~/.doubao/secrets/github_pat.enc` | 解密管道 `gh auth login --with-token`，见第五节；遵循全局取—用—弃纪律（解密进变量、不回显、用完 unset） |
-| `git push`（SSH） | SSH 私钥 + passphrase | `~/.ssh/id_*` + ssh-agent/钥匙串 | `ssh-add --apple-use-keychain` 一次后免输，详见 [security-and-git.md](security-and-git.md) |
+| `git push`（SSH） | SSH 私钥 + passphrase | `~/.ssh/id_*` + ssh-agent/钥匙串 | `ssh-add --apple-use-keychain` 一次后免输，详见 [ssh-keys-and-config.md](ssh-keys-and-config.md) |
 | `sudo` / 系统级命令 | 统一主口令 | 交互输入（优先）；.9 另有 `sudo.enc` 供自动化 | 见第三节；不让 agent 经手时由用户终端亲输 |
 | 远程关机（webhook） | `SHUTDOWN_TOKEN` | 远程机 launchd plist | 见第六节 / [sop.md](sop.md) 第五节 |
 | OpenToken/TokenRank 上报 | webhook_url（含个人令牌） | `~/.opentoken/config.json` | 见第七节 / [opentoken.md](opentoken.md) |
@@ -46,12 +46,12 @@
 
 ---
 
-## 四、SSH 密钥（摘要，详见 security-and-git.md）
+## 四、SSH 密钥（摘要，详见 ssh-keys-and-config.md）
 
 两台同步共三把：`id_rsa`（Web3Stack404）、`id_ed25519`（tinyverse）、`id_rsa_softwawrecheng`（byte886 主力，文件名历史拼写勿改）。
 
 - 所有私钥应交由 ssh-agent + macOS 钥匙串，首次输 passphrase 后免重复输入。
-- **实测状态（2026-09-15）**：两机 ssh-agent 均加载 3 把，且三把密钥指纹两机完全一致（.9 当日修复 agent，并以 .8 为准对齐 ed25519/id_rsa、旧 key 改名 `.migrated-bak` 留底，见 [security-and-git.md](security-and-git.md) 第二、三节）。
+- **实测状态（2026-09-15）**：两机 ssh-agent 均加载 3 把，且三把密钥指纹两机完全一致（.9 当日修复 agent，并以 .8 为准对齐 ed25519/id_rsa、旧 key 改名 `.migrated-bak` 留底，见 [ssh-keys-and-config.md](ssh-keys-and-config.md) 第二、三节）。
 - 双机互配公钥免密（`ssh wj` / `ssh cw`），2026-09-16 双向实测通过；GitHub 三账号公钥均有效（byte886/tinyverse/Web3Stack404）。旧公网云服务器（root）已退役、两机 SSH config 已清，`.9` 密钥对齐时的 `.migrated-bak` 旧私钥留底也已删除。
 
 ---

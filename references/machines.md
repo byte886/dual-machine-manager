@@ -70,12 +70,12 @@ df -h                                    # 磁盘与可用量
 - `~/.ssh/id_ed25519` — ED25519 密钥（GitHub tinyverse 账号用）
 - `~/.ssh/id_rsa_softwawrecheng` — 主力 GitHub 账号 byte886 用（注意文件名拼写 softwawrecheng，是历史拼写，不要改）
 
-> ssh-agent 加载状态、钥匙串、GitHub 多账号分流见 [security-and-git.md](security-and-git.md)。
+> ssh-agent 加载状态、钥匙串见 [ssh-keys-and-config.md](ssh-keys-and-config.md)；GitHub 多账号分流见 [git-and-github-accounts.md](git-and-github-accounts.md)。
 
 ### SSH config 中的 Host（2026-09-16 清理后）
 - **双机互访**：`.8` 配 `wj`（192.168.2.9），`.9` 配 `cw`（192.168.2.8），均带 ControlMaster 复用
 - **GitHub**：`.8` 三账号别名 `github.com`（byte886 主力）、`github-tinyverse`、`github-web3`；`.9` 仅主力 `github.com`
-- 旧公网云服务器（103.234.53.68 / 103.103.245.177 / 39.108.96.46）、旧内网网段 192.168.10.101~104，以及 `.9` 经 103.103.245.177:8020 的 ProxyJump，均为旧工作残留，已从两机 config 删除（跳板机 ProxyJump 通用配法见 security-and-git.md 的备用小节）
+- 旧公网云服务器（103.234.53.68 / 103.103.245.177 / 39.108.96.46）、旧内网网段 192.168.10.101~104，以及 `.9` 经 103.103.245.177:8020 的 ProxyJump，均为旧工作残留，已从两机 config 删除（跳板机 ProxyJump 通用配法见 [ssh-keys-and-config.md](ssh-keys-and-config.md) 第五节备用小节）
 
 ---
 

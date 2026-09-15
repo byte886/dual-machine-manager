@@ -1,6 +1,6 @@
 ---
 name: dual-machine-manager
-description: 两台 Mac（本机 cw/192.168.2.8 + 远程黑苹果 wj/192.168.2.9）的统一管家技能。覆盖系统信息、SSH 互访、launchd 后台服务、brew 服务、cron、凭证管理、OpenToken/TokenRank、远程关机、双机同步、日常巡检、故障排查等全部运维管理活；并沉淀双机深度盘点：包管理工具（Homebrew/mise/cargo/npm/pip）、IDE 与常用软件、SSH/密钥/钥匙串/Git/GitHub 多账号、机器健康度（内存/磁盘/进程/巡检）、双机差异对比与一致性维护。当用户提到「两台机器」「机器管家」「巡检」「服务状态」「后台进程」「远程关机」「双机同步」「OpenToken」「TokenRank」「wj」「黑苹果」「192.168.2.9」「凭证」「密码管理」「包管理」「Homebrew」「mise」「IDE」「VS Code 扩展」「ssh-agent」「git credential」「GitHub 多账号」「磁盘空间」「内存占用」「健康度」「双机差异」「一致性」等运维管理相关需求时使用本技能。
+description: 两台 Mac（本机 cw + 远程黑苹果 wj）的统一运维管家。覆盖系统信息、SSH 互访、launchd/brew/cron 后台服务、凭证落点台账、OpenToken/TokenRank、远程关机、双机同步、日常巡检、故障排查；并沉淀双机盘点：包管理器（Homebrew/mise/cargo/npm/pip）、IDE 与软件、SSH/密钥/钥匙串/Git/GitHub 多账号、机器健康度、双机差异一致性。当用户提到两台机器、机器管家、巡检、服务状态、后台进程、远程关机、双机同步、OpenToken、wj/黑苹果、凭证、包管理、Homebrew、IDE、ssh-agent、GitHub 多账号、磁盘/内存健康度、双机差异一致性等运维需求时使用。
 compatibility: macOS（已验证：macOS 15.7.8 x86_64，两台机器均为 Mac）；未验证 Windows / Linux
 ---
 
@@ -37,7 +37,8 @@ compatibility: macOS（已验证：macOS 15.7.8 x86_64，两台机器均为 Mac�
 | [references/sop.md](references/sop.md) | 需要执行标准运维流程时 | 日常巡检、双机同步、服务管理、远程关机、故障排查、新工具接入、凭证轮换等 SOP |
 | [references/package-managers.md](references/package-managers.md) | 需要对比/安装/排障包管理器时 | 双机包管理工具对比（Homebrew/npm/pip3/gem/cargo/mise/pnpm/yarn/go/java/maven/gradle）、本机 formulae 分类、远程机 Homebrew 现状与非交互 SSH 的 PATH 坑、node/npm 来源、mise 作用、一致性维护建议 |
 | [references/ide-and-software.md](references/ide-and-software.md) | 需要盘点 IDE/软件时 | IDE/开发工具对比、本机 VS Code 扩展清单、远程 code CLI 现状、常用软件按分类双机对比（共有/仅本机/仅远程机） |
-| [references/security-and-git.md](references/security-and-git.md) | 需要处理 SSH/密钥/钥匙串/Git/GitHub 多账号、gh 登录态时 | SSH 配置对比、双机已加载密钥指纹对照、远程机 ssh-agent 修复记录与通用 SOP、钥匙串/GPG/密码管理器状态、Git 工具与 gh 版本对比、远程机 git credential helper、GitHub 账号体系（SSH 分流 / gh 登录态 / 提交身份三者分工） |
+| [references/ssh-keys-and-config.md](references/ssh-keys-and-config.md) | 需要处理 SSH/密钥/钥匙串、远程机 ssh-agent 修复、SSH config 分流与退役主机时 | SSH 配置对比、双机已加载密钥指纹对照、远程机 ssh-agent 修复 SOP、钥匙串/GPG/密码管理器状态、SSH config 要点、已退役主机台账、ProxyJump 配法 |
+| [references/git-and-github-accounts.md](references/git-and-github-accounts.md) | 需要处理 Git 工具、gh 登录态、GitHub 多账号分流时 | Git 工具与 gh 版本对比、远程机 git credential helper、GitHub 账号体系（SSH 分流 / gh 登录态 / 提交身份三者分工） |
 | [references/health.md](references/health.md) | 需要看机器健康度/磁盘/内存/巡检命令时 | 资源占用对比、🔴4 个优先问题、🟡关注项、🟢健康项、磁盘详情、Home 目录大户、系统更新、只读巡检命令清单 |
 | [references/comparison.md](references/comparison.md) | 需要理解双机定位/差异/一致性策略时 | 双机定位总结、全维度差异总表、必须一致/允许差异/需修复不对称、双机同步 SOP、新工具双机决策流程 |
 
