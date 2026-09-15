@@ -51,12 +51,15 @@
 2. **另一台：快进对齐（不要用 pull）**
    ```bash
    cd ~/Doubao
-   git fetch origin
+   git -c fetch.recurseSubmodules=no fetch origin   # 关键：关闭递归抓取（见下方坑）
    git rev-list origin/main..HEAD       # 必须为空（本地无未推送提交）才继续，否则先处理在途提交
    git merge --ff-only origin/main
    git submodule update --init --recursive
    ```
    经 ssh 在远程机执行时，其非交互 PATH 不含 /usr/local/bin；对齐只用系统 git（/usr/bin）即可，无需 brew 版。
+
+   **坑（2026-09 实测）：fetch 必须关递归抓取。** 主仓配了 `fetch.recurseSubmodules=on-demand` / `submodule.recurse=true`，裸 `git fetch origin` 会连带抓子模块；当二级嵌套子模块（`wechat-control/third-party/wx-cli`）处于 detached HEAD、且其当前分支没有 remote 时，递归抓取报 `fatal: No remote for the current branch.`，若用 `&&` 串命令会在 merge 前短路（HEAD 不动、也没有 fast-forward 输出，极易误判为已对齐）。对策：fetch 一律加 `-c fetch.recurseSubmodules=no`，子模块统一交给后续 `git submodule update --init --recursive` 对齐。
+   **二级嵌套子模块查询**：主仓根执行 `git submodule status skills/wechat-control/third-party/wx-cli` 会 pathspec 不匹配；须用 `git submodule status --recursive | grep wx-cli`。对齐完成后用 `git submodule status --recursive` 双机核对所有层级指针一致。
 
 3. **注意事项**
    - 技能和脚本内禁止硬编码 `/Users/<用户名>`，用 `$HOME` / `Path.home()` / `~`
