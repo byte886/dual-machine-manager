@@ -23,6 +23,7 @@
 | **java** | ✅ mise temurin-17 | ⚠️ 仅 /usr/bin/java 桩、无 JRE（报 Unable to locate），需要时 brew install | 远程暂无可用 JDK |
 | **maven** | ✅ mise 3.9.16 | ❌ 无 | 仅本机 |
 | **gradle** | ✅ mise 8.1.1 | ❌ 无 | 仅本机 |
+| **gita**（多 git 仓总览/批量） | ✅ `/usr/local/bin/gita`（brew），`gita ll` 已纳管仓库群 | ✅ `/usr/local/bin/gita`（brew），已纳管 | 双机均装；**用法归 mac-system-toolkit 的 git 多仓能力，本表只登台账**；纳管清单 `~/.config/gita/repos.csv` 机器相关不入库 |
 
 ---
 
@@ -49,6 +50,22 @@
 #### casks（10 个）
 
 `cc-switch`, `chromedriver`, `electrum`, `font-fira-code`, `keycastr`, `rustdesk`, `stretchly`, `tailscale-app`, `temurin`, `wechattweak-cli`
+
+#### Homebrew on Intel 支持时间线与替代预案（2026-09 查官方）
+
+两台均为 Intel 黑苹果，Homebrew 对 Intel(x86_64) 的退场是确定时间线（来源见末尾官方链接）：
+
+- **2026-09（Homebrew 7.0 起）**：Intel x86_64 降为 **Tier 3**——停止为 Intel 构建新 bottle（二进制包）、撤 CI；**但已装的 Homebrew 仍可正常运行**，存量包照用，只是装新包可能无预编译件而回退源码编译（黑苹果上慢且易失败）。
+- **2027-09 起**：**彻底移除**在 Intel 上运行 Homebrew 的能力。
+- 背景：macOS Tahoe 26 是最后一代支持 Intel 的系统，macOS 27 弃 Intel；GitHub Actions 于 2027 秋退役 Intel macOS runner。官方对 Intel 的点名替代是 **MacPorts**（仍持续支持 Intel macOS），`brew doctor` 在无 bottle 时也会建议 MacPorts。
+
+对本双机的应对（**不急于迁移，有约一年缓冲，以"用到装不上"为触发点**）：
+
+1. **语言运行时不依赖 brew bottle**：node/java/maven/gradle 统一走 mise（见 2.6），brew 退场不影响开发运行时；
+2. **GUI 应用走 cask**：cask 装的是上游 `.app`，基本不受 core formula 停建 bottle 影响；
+3. **命令行工具**：rg/fd/jq/ffmpeg/gh/gita 等存量包一直可用；2027 前若新工具在 brew 无 Intel bottle，再按需评估 MacPorts、官方二进制或源码，不提前整体迁移。
+
+> 来源：Homebrew 官方 Support Tiers（https://docs.brew.sh/Support-Tiers）、Homebrew 7.0.0 release notes（https://brew.sh/2026/09/13/homebrew-7.0.0/）。
 
 ### 2.2 npm（sandbox 隔离，非系统级）
 
