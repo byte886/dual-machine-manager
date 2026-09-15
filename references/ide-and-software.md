@@ -104,6 +104,21 @@ ssh wj '/usr/local/bin/code --list-extensions'
 > - **微信多开（WeChat_backup / WeChat_tampered）是历史试验遗留，已验证会触发风控封号，方案废弃、不要再复活、不要当能力使用**；当前统一为单官方 App 内切换账号（见 wechat-control 技能 new-account-sop §A.4.2）。这两个 .app 在远程机上，是否删除由用户决定，不擅删。
 > - Warp、Devin（AI 开发任务）、Macs Fan Control（黑苹果散热监控）才是远程机的角色特征，保留。
 
+### 4.4 代理客户端与端口（双机台账，用时仍以现场探测为准）
+
+> 这里只记"装了什么、常态端口"用于快速预判；**真正使用时必须现场探测 + 连通自测**（原则见全局 `AGENTS.md` 三、`security-baseline/references/network-and-vpn.md`，探测动作见 mac-system-toolkit `vpn-control.md`）。端口会随客户端设置或开关变化，**不得把台账值写死进脚本**。订阅地址/账号属敏感凭证，按 security-baseline 加密，不放本表。
+
+| 机器 | 客户端 / 内核 | HTTP / mixed 口 | SOCKS 口 | 控制 / 备注 | 最近实测 |
+|---|---|---|---|---|---|
+| 本机 cw（.8） | Clash Verge Rev / mihomo | `127.0.0.1:7897`（mixed，HTTP+SOCKS 合一） | `7898` | launchd 服务 `io.github.clash-verge-rev.clash-verge-rev`；external-controller 走 unix socket `/tmp/verge/verge-mihomo.sock`；配置目录 `~/Library/Application Support/io.github.clash-verge-rev.clash-verge-rev/` | 2026-09-15 `curl -x 7897` 访问 google 返回 HTTP 302（通）；lsof 未必列出该口，以连通实测为准 |
+| 远程 wj（.9） | ClashX Pro | `127.0.0.1:7890` | 随客户端配置 | lsof 实测 7890 处于 LISTEN | 2026-09-15 |
+
+连通自测（`<port>` 换成现场探到的值）：
+
+```bash
+curl -x http://127.0.0.1:<port> --max-time 5 -o /dev/null -w "%{http_code}\n" https://www.google.com
+```
+
 ---
 
 ## 五、差异总结与一致性维护建议
