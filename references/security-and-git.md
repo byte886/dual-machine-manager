@@ -1,6 +1,7 @@
 # SSH / 密钥 / 密码 / 钥匙串 + Git 工具
 
 > **敏感原则**：本文只记录密钥路径与指纹，绝不记录私钥内容、口令、token 明文；易变版本号以现场实测为准。
+> **方法论指针**：凭证分级、AI/开发取密 SOP、主口令怎么向用户要、公开仓红线统一看 `skills/security-baseline/`；加解密命令看 mac-system-toolkit。本文只记双机 SSH/Git 侧的台账与操作，不重复其条文。
 
 ---
 
@@ -11,7 +12,7 @@
 | SSH 版本 | OpenSSH_9.9p2, LibreSSL 3.3.6 | OpenSSH_9.9p2, LibreSSL 3.3.6 |
 | 私钥数量 | 3 把：`id_ed25519`、`id_rsa`、`id_rsa_softwawrecheng` | 3 把：同名三把（已同步） |
 | 公钥数量 | 3 个 `.pub` | 3 个 `.pub` |
-| **ssh-agent 状态** | ✅ **3 把密钥已加载** | ⚠️ **agent 未运行** |
+| **ssh-agent 状态** | ✅ **3 把密钥已加载**（2026-09-15 实测） | 🔴 **加载 0 把、仍待修**（2026-09-15 `ssh-add -l` 实测，修复见第三节） |
 | SSH_AUTH_SOCK | ✅ 已设（launchd listener） | ❌ 空 |
 | 钥匙串 | login.keychain-db + System.keychain（默认 login） | login.keychain-db + System.keychain（默认 login） |
 | GPG | ❌ 未安装 | ❌ 未安装 |

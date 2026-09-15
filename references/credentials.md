@@ -1,114 +1,109 @@
-# 密码与凭证管理
+# 密码与凭证管理（双机台账）
 
-> 本文档记录两台机器的凭证位置、管理方式与使用规范。本仓库为公开仓，**敏感值一律不写明文**，只记录位置与获取方式。
-
----
-
-## 一、系统密码
-
-### sudo 密码
-- **两台机器使用同一个统一主密码**（真实值不写入公开仓库；需要时由用户当面提供，或从用户本机密码保管处取用）
-- **使用场景**：需要 sudo 权限的命令行操作
-- **免交互写法**：`echo '<sudo密码>' | sudo -S <command>`，密码以占位/变量传入，**禁止把真实值写进任何入库脚本或文档、不在日志回显**；仅限可信脚本
+> 本篇只记两台机器**实际有哪些凭证、放在哪、怎么取、双机是否一致**这些"台账事实"。
+> **方法论不在这里**：凭证分级、AI/开发取密 SOP（取—用—弃、不进对话）、主口令怎么向用户要、公开仓红线与泄漏应急，统一以 **`skills/security-baseline/`** 为唯一权威源；加解密命令用法以 mac-system-toolkit `secret-encryption.md` 为准。本篇不复制其条文（DRY）。本仓为公开仓，**敏感值一律不写明文**，只记位置与获取方式。
 
 ---
 
-## 二、SSH 密钥
+## 一、"需要密码/凭证的工具"总览矩阵
 
-两台机器的 SSH 密钥完全同步，共三把：
+| 工具/场景 | 需要什么凭证 | 凭证来处 | 取用方式 / SOP |
+|---|---|---|---|
+| `gh`（建仓/API/PR/Release） | GitHub PAT（byte886，classic 全权限、永不过期） | 全局 `~/.doubao/secrets/github_pat.enc` | 解密管道 `gh auth login --with-token`，见第五节；取密纪律见 security-baseline `ai-agent-credentials.md` |
+| `git push`（SSH） | SSH 私钥 + passphrase | `~/.ssh/id_*` + ssh-agent/钥匙串 | `ssh-add --apple-use-keychain` 一次后免输，详见 [security-and-git.md](security-and-git.md) |
+| `sudo` / 系统级命令 | 统一主口令 | 交互输入（优先）；.9 另有 `sudo.enc` 供自动化 | 见第三节；不让 agent 经手时由用户终端亲输 |
+| 远程关机（webhook） | `SHUTDOWN_TOKEN` | 远程机 launchd plist | 见第六节 / [sop.md](sop.md) 第五节 |
+| OpenToken/TokenRank 上报 | webhook_url（含个人令牌） | `~/.opentoken/config.json` | 见第七节 / [opentoken.md](opentoken.md) |
+| 脚本调第三方平台 | API key/secret | 项目 `<项目>/.secrets/*.enc` | `secrets` 运行时解密，方法论见 security-baseline |
+| 二段因子登录（2FA） | TOTP 6 位动态码 | **用户手机 Microsoft Authenticator** | 当次向用户要、用后即弃，agent 默认不持有 TOTP secret |
+| 加解密本身（`secrets` 命令） | 统一主口令 | 用户交互提供；.9 无人值守用 `master.pass` | 见 security-baseline `master-passphrase.md` |
 
-| 密钥文件 | 类型 | 用途 |
-|---|---|---|
-| `~/.ssh/id_rsa` | RSA | GitHub Web3Stack404 账号；云服务器默认登录 |
-| `~/.ssh/id_ed25519` | ED25519 | GitHub tinyverse 账号 |
-| `~/.ssh/id_rsa_softwawrecheng` | RSA | GitHub 主力账号 byte886（Doubao 工作仓）；注意文件名拼写 `softwawrecheng` 是历史拼写，不要改 |
+> 一句话：**外部服务只看到各自不同的 token/key，直接间接都拿不到用户主口令明文**；这是整套设计的目标。
 
-### 密钥管理
-- 所有私钥已加入 ssh-agent，macOS 钥匙串保存口令，首次输入后长期免输
-- SSH config 中 `Host *` 配置了 `AddKeysToAgent yes` 和 `UseKeychain yes`
-- GitHub 多账号通过 `IdentitiesOnly yes` 隔离，避免误认证
+## 二、双机加密凭证清单（2026-09-15 实测台账）
 
-### 公钥分发
-- 两台机器互配公钥免密（`ssh wj` / `ssh cw` 无需密码）
-- 多台云服务器（root）已配置公钥登录
+目录 `~/.doubao/secrets/`（权限 700，仓库外、**永不入库**），文件权限 600：
+
+| 文件 | .8 本机 cw | .9 远程 wj | 用途 |
+|---|---|---|---|
+| `github_pat.enc` | ✅ 90B | ✅ 90B | byte886 主力 PAT（双机同密文、可互拷） |
+| `sudo.enc` | ❌ 无（交互为主） | ✅ 45B | 无人值守 sudo 的加密口令 |
+| `master.pass` | ❌ 无（默认交互给主口令） | ✅ 8B（600） | 非交互解密用本机主口令文件，仅可信本机、不入云同步 |
+
+- 两机不对称是**刻意结果**：.8 以交互为主、不需要落 master.pass；.9 承担无人值守自动化才配 `sudo.enc`/`master.pass`。
+- 复核命令（只列文件名/权限，不读内容）：`ls -la ~/.doubao/secrets/`
+- 项目级凭证在各项目 `<项目>/.secrets/*.enc`（`.enc` 可随仓、明文不入库），不在本全局清单。
+- 变更后双机对齐方式见第八节与 [sop.md](sop.md) 第八节。
 
 ---
 
-## 三、GitHub Personal Access Token (PAT)
+## 三、系统密码（sudo）
+
+- **两台机器使用同一个统一主口令**（真实值不写入公开仓库；需要时由用户当面/交互提供，或从 `.enc` 解密）。
+- **使用场景**：需要 sudo 权限的命令行操作。
+- **优先让用户在自己终端亲输**；确需自动化时：
+  - .9 用 `~/.doubao/secrets/sudo.enc`；.8 无该文件，按需再建。
+  - `echo '<sudo密码>' | sudo -S <command>`，密码以占位/变量传入，**禁止真实值进入库脚本/文档、不在日志回显**，仅限可信脚本。
+
+---
+
+## 四、SSH 密钥（摘要，详见 security-and-git.md）
+
+两台同步共三把：`id_rsa`（Web3Stack404/云服务器）、`id_ed25519`（tinyverse）、`id_rsa_softwawrecheng`（byte886 主力，文件名历史拼写勿改）。
+
+- 所有私钥应交由 ssh-agent + macOS 钥匙串，首次输 passphrase 后免重复输入。
+- **实测状态（2026-09-15）**：.8 ssh-agent 已加载 3 把；**.9 ssh-agent 加载 0 把（遗留待修，修复 SOP 见 security-and-git.md 第三节）**。
+- 双机互配公钥免密（`ssh wj` / `ssh cw`），云服务器（root）已配公钥。
+
+---
+
+## 五、GitHub Personal Access Token（PAT）
 
 ### 当前主力 PAT（账号 byte886）
-- **类型 / 有效期**：classic token，**No expiration（永不过期）**，供长期自动化使用；账号级全权限（21 个顶层 scope：repo、workflow、admin:* 系列、user、gist、notifications、project、delete_repo、write:* 等。页面勾选时的子权限会被父权限隐含，GitHub 最终只保存"最小必要集"，权限等价全选，属正常）
-- **加密落点（双机同路径，仓库外、永不入库）**：`~/.doubao/secrets/github_pat.enc`
-  - 本机 cw：`$HOME/.doubao/secrets/github_pat.enc`（家目录名 chenwenjie）
-  - 远程 wj：`$HOME/.doubao/secrets/github_pat.enc`（家目录名 wenjiechen）
-  - 两台统一主密码一致，密文可直接互相拷贝解密；目录权限 700、文件 600
-- **加密/解密工具**：全局命令 `secrets`（权威源在 mac-system-toolkit，固定算法 aes-256-cbc + pbkdf2 + base64，不可改，保证双机/新旧密文互解）
+- **类型/有效期**：classic token，**No expiration（永不过期）**，供长期自动化；账号级全权限（21 个顶层 scope，页面子权限被父权限隐含，最终等价全选，属正常）。
+- **加密落点（双机同路径、仓库外、永不入库）**：`~/.doubao/secrets/github_pat.enc`（两机均 90B，统一主口令一致、密文可互拷；目录 700、文件 600）。
+- **加解密工具**：全局命令 `secrets`（软链到 mac-system-toolkit `scripts/secrets.sh`；算法 aes-256-cbc + pbkdf2 + base64 固定不改，保证双机/新旧密文互解）。
 
-### 存储方式（通用规则）
-- **加密存储，不明文保存**：token 不进 git、不进脚本、不进 shell 历史；需要时现解密、仅在变量中短暂持有，用完 `unset`；不在日志/聊天回显完整值，最多显示 `ghp_xxxx…后4位`
-- **解密主密码**：与系统统一主密码相同（值不入库，需要时由用户提供，或读本机 600 权限的 `~/.doubao/secrets/master.pass`）
-- **常用话术**：「自动化获取 playwright token」（用户已记录为常用话术，触发时自动解密获取）
-
-### 取用与 gh 登录（标准命令）
+### 取用与 gh 登录（标准命令，取—用—弃）
 ```bash
-# 解密到变量（不要 echo 全量）
-TOKEN="$(ENC_PASS='<统一主密码>' secrets decrypt "$HOME/.doubao/secrets/github_pat.enc")"
-# 非交互登录/刷新 gh（两台机器都登录为 byte886）
+TOKEN="$(ENC_PASS='<统一主口令>' secrets decrypt "$HOME/.doubao/secrets/github_pat.enc")"
 printf '%s' "$TOKEN" | gh auth login -h github.com --with-token
-gh api user -q .login            # 应回 byte886
+gh api user -q .login            # 应回 byte886；不打印 token
 unset TOKEN
 ```
-
-### 使用场景
-- `gh`（GitHub CLI）登录态：建仓、GitHub API、Release、Actions 等
-- 需要 GitHub API 认证的自动化脚本
-- Playwright 等工具的 token 获取（「自动化获取 playwright token」话术）
+- token 不进 git/脚本/shell 历史；现解密、仅变量短暂持有、用完 unset；对外最多显示 `ghp_xxxx…后4位`。
+- 主口令与系统统一口令相同（值不入库，交互提供，或读 .9 的 `master.pass`）。
+- **常用话术**：「自动化获取 playwright token」（用户已记录，触发时按本节自动解密获取，过程不回显）。
 
 ### 双机同步与轮换
-- PAT 更新后**两台机器都要改**：把新 `github_pat.enc` 经 scp 送到对端同路径，再各自重跑上面的 `gh auth login --with-token`；旧 token 到 GitHub 网页删除退役
-- 完整轮换 SOP 见 sop.md 第八节；新建 GitHub 仓默认 **public**（用户硬偏好）
+- PAT 更新后**两台都要改**：新 `github_pat.enc` 经 scp 送对端同路径，各自重跑 `gh auth login --with-token`；旧 token 到 GitHub 网页删除退役。
+- 完整轮换步骤见 [sop.md](sop.md) 第八节；新建 GitHub 仓默认 **public**（用户硬偏好）。
 
 ---
 
-## 四、远程关机 Webhook Token（远程机 wj）
+## 六、远程关机 Webhook Token（仅远程机 wj）
 
-### 位置
-- 存储在远程机 launchd plist 的环境变量中：
-  `~/Library/LaunchAgents/com.user.powerwebhook.plist` → `SHUTDOWN_TOKEN`
-
-### 用途
-- 认证远程关机 HTTP 请求
-- 配合 cloudflared tunnel（`power-webhook`）暴露到公网
-
-### 安全注意
-- 此 token 等同于远程关机权限，**不要对外分享**
-- 查看方式：`ssh wj "grep -A1 SHUTDOWN_TOKEN ~/Library/LaunchAgents/com.user.powerwebhook.plist"`
-- 如需轮换：修改 plist 中的 `SHUTDOWN_TOKEN` 值，然后 `launchctl unload` + `load` 重启服务
+- 位置：远程机 `~/Library/LaunchAgents/com.user.powerwebhook.plist` → `SHUTDOWN_TOKEN`，配合 cloudflared tunnel（`power-webhook`）暴露公网。
+- 等同于远程关机权限，**不对外分享**；查看：`ssh wj "grep -A1 SHUTDOWN_TOKEN ~/Library/LaunchAgents/com.user.powerwebhook.plist"`。
+- 轮换：改 plist 值后 `launchctl unload` + `load` 重启服务。
 
 ---
 
-## 五、OpenToken 接入凭证（TokenRank）
+## 七、OpenToken 接入凭证（TokenRank）
 
-### 位置
-- 本机：`~/.opentoken/config.json` → `webhook_url`
-- 凭证形式：URL 路径中包含个人令牌（`/api/subapp/u/<令牌>`）
-
-### 安全注意
-- 此 URL 绑定生财有术账号，**是专属凭证，请勿分享给他人或公开截图**
-- 他人获取后可冒用名义上报 token 用量
-- 汇报或贴日志时，接入地址（含个人令牌）必须打码
-
-### 查看（已打码示例）
+- 本机 `~/.opentoken/config.json` → `webhook_url`，URL 路径含个人令牌（`/api/subapp/u/<令牌>`）。
+- 绑定生财有术账号，**专属凭证、不分享、公开截图必须打码**；他人拿到可冒用名义上报。
+- 打码查看：
 ```bash
-python3 -c "import json; c=json.load(open('$HOME/.opentoken/config.json')); u=c['webhook_url']; print(u[:50]+'...'+u[-12:])"
+python3 -c "import json,os; c=json.load(open(os.path.expanduser('~/.opentoken/config.json'))); u=c['webhook_url']; print(u[:50]+'...'+u[-12:])"
 ```
 
 ---
 
-## 六、凭证管理原则
+## 八、凭证管理原则
 
-1. **最小暴露**：敏感值不写进文档、不输出到日志、不贴到聊天
-2. **位置优先**：文档只记录凭证存在哪里、怎么获取，不记录值本身
-3. **打码义务**：对外汇报或分享时，所有 token / 密码 / 密钥必须打码
-4. **轮换机制**：怀疑泄露时立即轮换（webhook token、PAT、关机 token 均可重新生成）
-5. **双机同步**：SSH 密钥两台机器保持一致；`~/Doubao` 两台均可提交，对端只快进对齐（禁 pull，见 sop.md 第二节）
+1. **位置优先于值**：只记"凭证在哪、怎么取"，不记值本身；方法论与红线以 security-baseline 为唯一源。
+2. **最小暴露**：不写进非凭证文档、不输出到日志、不贴到聊天；对外一律打码。
+3. **加密落盘**：全局 `~/.doubao/secrets/*.enc`（永不入库）、项目 `.secrets/*.enc`（仅密文可随仓），明文绝不入库。
+4. **轮换机制**：怀疑泄漏立即轮换；轮换后更新本台账位置说明、双机对齐、验证新凭证、退役旧凭证（SOP 见 sop.md 第八节）。
+5. **双机一致性**：SSH 密钥、`github_pat.enc` 两台保持一致；`sudo.enc`/`master.pass` 按是否需要无人值守差异化保留（见第二节）。
