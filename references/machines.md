@@ -12,13 +12,15 @@
 | 别名 | `cw` | `wj` |
 | 主机名 | `192.168.2.8` | `192.168.2.9` |
 | 用户名 | `chenwenjie` | `wenjiechen` |
-| 局域网 IP | `192.168.2.8`（Wi-Fi/有线，以现场为准） | `192.168.2.9`（以现场为准） |
+| 内网 IP（有线 en0） | `192.168.2.8`（en0 Ethernet；en1 Wi-Fi 当前未连） | `192.168.2.9`（en0 Ethernet；en1 Wi-Fi 当前未连） |
 | MAC 地址(en0) | `a0:36:bc:28:43:b3` | `c8:7f:54:69:eb:7b` |
 | 机型标识（SMBIOS） | Mac Pro（**MacPro7,1，黑苹果伪装机型**） | Mac Pro（**MacPro7,1，黑苹果伪装机型**） |
 | 系统 | macOS 15.7.8 (24G824) | macOS 15.7.8 (24G824) |
 | 架构/内核 | x86_64 / Darwin 24.6.0 | x86_64（黑苹果）/ Darwin 24.6.0 |
 | Homebrew | 已安装（/usr/local） | 已安装（/usr/local；非交互 SSH 的 PATH 不含它，用绝对路径） |
 | git 用户 | softwarecheng / softwarecheng@126.com（以 ~/.gitconfig 为准） | softwarecheng / softwarecheng@126.com |
+
+> **网络实测（2026-09-16，两台一致）**：内网走**有线网卡 en0（Ethernet）**，.8=192.168.2.8、.9=192.168.2.9，默认路由均经 en0、网关 192.168.2.1；en1 是 Wi-Fi，当前未取 IPv4（未连）。双向 ping/SSH 通。历史上的 192.168.2.14、旧网段 192.168.10.x、公网云主机均为旧工作残留，已从两机 SSH config 清除。
 
 ---
 
@@ -70,11 +72,10 @@ df -h                                    # 磁盘与可用量
 
 > ssh-agent 加载状态、钥匙串、GitHub 多账号分流见 [security-and-git.md](security-and-git.md)。
 
-### SSH config 中的其他 Host
-两台机器的 config 中还配置了多台云服务器（root 用户）：
-- `103.234.53.68`、`103.103.245.177`、`39.108.96.46`（公网云服务器）
-- `192.168.10.101` ~ `192.168.10.104`（局域网服务器）
-- GitHub 多账号别名：`github.com`（byte886 主力）、`github-tinyverse`、`github-web3`
+### SSH config 中的 Host（2026-09-16 清理后）
+- **双机互访**：`.8` 配 `wj`（192.168.2.9），`.9` 配 `cw`（192.168.2.8），均带 ControlMaster 复用
+- **GitHub**：`.8` 三账号别名 `github.com`（byte886 主力）、`github-tinyverse`、`github-web3`；`.9` 仅主力 `github.com`
+- 旧公网云服务器（103.234.53.68 / 103.103.245.177 / 39.108.96.46）、旧内网网段 192.168.10.101~104，以及 `.9` 经 103.103.245.177:8020 的 ProxyJump，均为旧工作残留，已从两机 config 删除（跳板机 ProxyJump 通用配法见 security-and-git.md 的备用小节）
 
 ---
 
