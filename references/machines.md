@@ -68,7 +68,7 @@ df -h                                    # 磁盘与可用量
 - `~/.ssh/id_ed25519` — ED25519 密钥（GitHub tinyverse 账号用）
 - `~/.ssh/id_rsa_softwawrecheng` — 主力 GitHub 账号 byte886 用（注意文件名拼写 softwawrecheng，是历史拼写，不要改）
 
-> ssh-agent 加载状态、钥匙串、GitHub 多账号分流见 [security-and-git.md](security-and-git.md)；凭证"来处"与取密方法论见 security-baseline 技能。
+> ssh-agent 加载状态、钥匙串、GitHub 多账号分流见 [security-and-git.md](security-and-git.md)。
 
 ### SSH config 中的其他 Host
 两台机器的 config 中还配置了多台云服务器（root 用户）：

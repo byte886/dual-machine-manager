@@ -1,7 +1,6 @@
 # 密码与凭证管理（双机台账）
 
-> 本篇只记两台机器**实际有哪些凭证、放在哪、怎么取、双机是否一致**这些"台账事实"。
-> **方法论不在这里**：凭证分级、AI/开发取密 SOP（取—用—弃、不进对话）、主口令怎么向用户要、公开仓红线与泄漏应急，统一以 **`skills/security-baseline/`** 为唯一权威源；加解密命令用法以 mac-system-toolkit `secret-encryption.md` 为准。本篇不复制其条文（DRY）。本仓为公开仓，**敏感值一律不写明文**，只记位置与获取方式。
+> 本篇只记两台机器**实际有哪些凭证、放在哪、怎么取、双机是否一致**这些台账事实，不承载凭证分级、AI/开发取密 SOP、公开仓红线等方法论——那些是上层规矩，由全局路由（`~/Doubao/AGENTS.md`）在命中安全类任务时先行加载，本篇不回指、不复制，避免双向循环。本仓为公开仓，**敏感值一律不写明文**，只记位置与获取方式。
 
 ---
 
@@ -9,14 +8,14 @@
 
 | 工具/场景 | 需要什么凭证 | 凭证来处 | 取用方式 / SOP |
 |---|---|---|---|
-| `gh`（建仓/API/PR/Release） | GitHub PAT（byte886，classic 全权限、永不过期） | 全局 `~/.doubao/secrets/github_pat.enc` | 解密管道 `gh auth login --with-token`，见第五节；取密纪律见 security-baseline `ai-agent-credentials.md` |
+| `gh`（建仓/API/PR/Release） | GitHub PAT（byte886，classic 全权限、永不过期） | 全局 `~/.doubao/secrets/github_pat.enc` | 解密管道 `gh auth login --with-token`，见第五节；遵循全局取—用—弃纪律（解密进变量、不回显、用完 unset） |
 | `git push`（SSH） | SSH 私钥 + passphrase | `~/.ssh/id_*` + ssh-agent/钥匙串 | `ssh-add --apple-use-keychain` 一次后免输，详见 [security-and-git.md](security-and-git.md) |
 | `sudo` / 系统级命令 | 统一主口令 | 交互输入（优先）；.9 另有 `sudo.enc` 供自动化 | 见第三节；不让 agent 经手时由用户终端亲输 |
 | 远程关机（webhook） | `SHUTDOWN_TOKEN` | 远程机 launchd plist | 见第六节 / [sop.md](sop.md) 第五节 |
 | OpenToken/TokenRank 上报 | webhook_url（含个人令牌） | `~/.opentoken/config.json` | 见第七节 / [opentoken.md](opentoken.md) |
-| 脚本调第三方平台 | API key/secret | 项目 `<项目>/.secrets/*.enc` | `secrets` 运行时解密，方法论见 security-baseline |
+| 脚本调第三方平台 | API key/secret | 项目 `<项目>/.secrets/*.enc` | `secrets` 运行时解密进内存，明文不入库 |
 | 二段因子登录（2FA） | TOTP 6 位动态码 | **用户手机 Microsoft Authenticator** | 当次向用户要、用后即弃，agent 默认不持有 TOTP secret |
-| 加解密本身（`secrets` 命令） | 统一主口令 | 用户交互提供；.9 无人值守用 `master.pass` | 见 security-baseline `master-passphrase.md` |
+| 加解密本身（`secrets` 命令） | 统一主口令 | 用户交互提供；.9 无人值守用 `master.pass` | 主口令只在当次内存用于解密、不回显不入库 |
 
 > 一句话：**外部服务只看到各自不同的 token/key，直接间接都拿不到用户主口令明文**；这是整套设计的目标。
 
@@ -102,7 +101,7 @@ python3 -c "import json,os; c=json.load(open(os.path.expanduser('~/.opentoken/co
 
 ## 八、凭证管理原则
 
-1. **位置优先于值**：只记"凭证在哪、怎么取"，不记值本身；方法论与红线以 security-baseline 为唯一源。
+1. **位置优先于值**：只记"凭证在哪、怎么取"，不记值本身；分级与取密红线属上层方法论，不在本篇展开。
 2. **最小暴露**：不写进非凭证文档、不输出到日志、不贴到聊天；对外一律打码。
 3. **加密落盘**：全局 `~/.doubao/secrets/*.enc`（永不入库）、项目 `.secrets/*.enc`（仅密文可随仓），明文绝不入库。
 4. **轮换机制**：怀疑泄漏立即轮换；轮换后更新本台账位置说明、双机对齐、验证新凭证、退役旧凭证（SOP 见 sop.md 第八节）。
