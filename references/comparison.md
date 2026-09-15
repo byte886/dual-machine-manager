@@ -61,7 +61,7 @@
 | 项 | 机器 | 状态 / 处理 |
 |---|---|---|
 | ~~ssh-agent 未运行~~ | 远程机 | ✅ 已修复（2026-09-15）：launchd agent + 钥匙串 + `.zshenv` 持久化，见 security-and-git.md 第三节 |
-| **ed25519 / id_rsa 两机指纹不一致** | 两机 | ⚠️ 待用户决策以哪台为准再经安全渠道同步；主力 key 一致、不影响 GitHub，见 security-and-git.md 第二节 |
+| ~~ed25519 / id_rsa 两机指纹不一致~~ | 两机 | ✅ 已对齐（2026-09-15 以 .8 为准，.9 旧 key 改名 `.migrated-bak` 留底），见 security-and-git.md 第二节 |
 | ~~credential helper 失效~~ | 远程机 | 已随 gh 安装（/usr/local/bin/gh）自行解决；主仓走 SSH，无需再处理 |
 
 ---

@@ -27,10 +27,10 @@
 | 私钥文件 | .8 本机 cw 指纹 | .9 远程 wj 指纹 | 是否一致 |
 |---|---|---|---|
 | `id_rsa_softwawrecheng`（byte886 主力，git/GitHub 走它） | `5tkXaJcDPgE8Kaix7T25cj2uFnkTjbmwBJPyeeHqkhk` (RSA4096) | `5tkXaJcDPgE8Kaix7T25cj2uFnkTjbmwBJPyeeHqkhk` (RSA4096) | ✅ 一致 |
-| `id_ed25519`（tinyverse） | `EZbyOb7Sgro/7W9vOGLSgeJ+xCBug+twG/doBGtv9Cs`（注释 dev@tinyverse.space） | `pvBKozCGHiN+PkCOySySPsihLzDVMAzj0lWhztG+cNE`（注释 **compress-migration-20260914**） | ⚠️ **不一致** |
-| `id_rsa`（web3/云服务器） | `Qk9xb0gPN1Wa02NojIIlf35RnKG7j1aW0bNJZTBC4Ko` | `zRwiw53qLKX4ikNORrrh+TIoC2ZPiQ2UPDEKw3k7ZC0` | ⚠️ **不一致** |
+| `id_ed25519`（tinyverse） | `EZbyOb7Sgro/7W9vOGLSgeJ+xCBug+twG/doBGtv9Cs`（dev@tinyverse.space） | `EZbyOb7Sgro/7W9vOGLSgeJ+xCBug+twG/doBGtv9Cs`（dev@tinyverse.space） | ✅ 已对齐（2026-09-15） |
+| `id_rsa`（web3/云服务器） | `Qk9xb0gPN1Wa02NojIIlf35RnKG7j1aW0bNJZTBC4Ko` | `Qk9xb0gPN1Wa02NojIIlf35RnKG7j1aW0bNJZTBC4Ko` | ✅ 已对齐（2026-09-15） |
 
-> ⚠️ **待用户决策（不擅自覆盖私钥）**：主力 key 两机一致、GitHub 免密正常；但 ed25519 / id_rsa 两机并非同一把（.9 的 ed25519 是 2026-09-14 迁移期产物）。若 .9 要用这两把登录对应服务器/账号，需确认以哪台为准再经安全渠道同步私钥；在用户拍板前保持现状、不覆盖。
+> ✅ **2026-09-15 已对齐（以 .8 为准）**：此前 .9 的 ed25519（旧注释 compress-migration-20260914）/id_rsa 与 .8 不同；经内网 SSH 加密通道把 .8 两把私钥同步到 .9（私钥 600、不回显、不入库），.9 旧两把改名 `*.migrated-bak-20260915`（含 .pub）留底不删，重入 agent 与钥匙串后两机三把指纹完全一致。确认旧备份无用后可再清理。
 
 ---
 
@@ -165,7 +165,7 @@ fi
 
 ## 九、维护建议
 
-1. ~~远程机 ssh-agent 未运行~~ **已修复（2026-09-15，见第三节）**；当前唯一遗留的密钥不对称是 ed25519 / id_rsa 两机指纹不同（见第二节表，待用户决策是否对齐，不擅自覆盖私钥）。credential helper 已随 gh 安装解决（见第六节）。
+1. ~~远程机 ssh-agent 未运行~~ **已修复（2026-09-15，见第三节）**；~~ed25519 / id_rsa 两机指纹不一致~~ **已对齐（2026-09-15 以 .8 为准、.9 旧 key 留底，见第二节）**，至此两机三把密钥完全一致。credential helper 已随 gh 安装解决（见第六节）。
 2. **git 用户配置两台保持一致**（已是 softwarecheng / softwarecheng@126.com），不要在某台单独改。
 3. **GitHub 多账号只在本机**，远程机不补分流，符合其单账号定位。
 4. **如需 GPG 签名**：仅本机 `brew install gnupg`，远程机不跟进（其只做主力账号提交，签名策略由本机决定）。

@@ -51,7 +51,7 @@
 两台同步共三把：`id_rsa`（Web3Stack404/云服务器）、`id_ed25519`（tinyverse）、`id_rsa_softwawrecheng`（byte886 主力，文件名历史拼写勿改）。
 
 - 所有私钥应交由 ssh-agent + macOS 钥匙串，首次输 passphrase 后免重复输入。
-- **实测状态（2026-09-15）**：两机 ssh-agent 均已加载 3 把（.9 当日修复，见 [security-and-git.md](security-and-git.md) 第二、三节）；其中主力 `id_rsa_softwawrecheng` 两机一致，ed25519/id_rsa 两机指纹不同（待用户决策是否对齐）。
+- **实测状态（2026-09-15）**：两机 ssh-agent 均加载 3 把，且三把密钥指纹两机完全一致（.9 当日修复 agent，并以 .8 为准对齐 ed25519/id_rsa、旧 key 改名 `.migrated-bak` 留底，见 [security-and-git.md](security-and-git.md) 第二、三节）。
 - 双机互配公钥免密（`ssh wj` / `ssh cw`），云服务器（root）已配公钥。
 
 ---
