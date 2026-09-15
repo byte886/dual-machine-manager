@@ -68,17 +68,9 @@
 
 ## 四、双机同步 SOP（两机均可提交，对端只快进）
 
-```bash
-# 1. 在当前机提交并推送（两台都可以）
-cd ~/Doubao && git add -A && git commit -m "<msg>" && git push
+> 完整命令步骤只在 [sop.md 第二节](sop.md) 维护一处（权威），本节不复制，避免两处漂移。要点：当前机正常 commit/push（含子模块遵循"先子后父"）；对端 `fetch` → 确认 `rev-list origin/main..HEAD` 为空 → 仅 `merge --ff-only` → `submodule update`，**禁止 `git pull` / 合并提交**。
 
-# 2. 另一台快进对齐（禁止 git pull / 合并提交）
-cd ~/Doubao && git fetch origin && test -z "$(git rev-list origin/main..HEAD)" \
-  && git merge --ff-only origin/main && git submodule update --init --recursive
-```
-
-约定（见 `~/Doubao/AGENTS.md` 与 sop.md 第二节）：
-- 同一套 `~/Doubao` 在两台 Mac 间同步，**两台均可提交**，对端只做 ff-only；
+- 同一套 `~/Doubao` 在两台 Mac 间同步，**两台均可提交**，对端只做 ff-only；submodule / gita 的通用机制由 mac-system-toolkit 的 git 多仓能力提供，本节只管"两台机如何协作"。
 - 技能与脚本内**禁止硬编码 `/Users/<用户名>`**：Shell 用 `$HOME`、Python 用 `Path.home()`、文档示例用 `~`；引号内/配置框内 `~` 不展开，用 `$HOME`。
 
 ---

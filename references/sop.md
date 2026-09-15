@@ -123,6 +123,8 @@ rm -rf ~/.opentoken ~/.local/bin/opentoken ~/Library/LaunchAgents/com.opentoken.
 
 **触发**：用户说「关掉黑苹果」「远程关机」「关 wj」
 
+> 边界：**本机**延迟关机/重启、豆包忙碌检测属通用能力，由 mac-system-toolkit 的电源管理能力提供；本节只讲**远程关 wj** 这一双机场景（经 SSH，或 wj 专属的 webhook）。
+
 ### 方式一：通过 Webhook（需 cloudflared tunnel 在线）
 远程机运行着 `powerwebhook` 服务，通过 cloudflared tunnel 暴露到公网。发送带 token 的 HTTP 请求即可关机。
 

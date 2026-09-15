@@ -101,36 +101,21 @@ softwareupdate -l
 
 ---
 
-## 八、健康巡检命令清单（只读，可直接执行）
+## 八、健康巡检怎么跑（双机编排）
+
+> **各项指标怎么查、正常值怎么判读**是跨机通用能力，由 mac-system-toolkit 的硬件健康检查能力提供（只读脚本 `health_check.sh [--full] [--json]`，覆盖 CPU/内存/磁盘/SMART/网络/风扇/运行时间；调用入口以该技能 SKILL 为准，本篇不写其内部路径）。本节只说"一次查两台"的编排；查出的问题与时点值台账见前文第一~六节。
+
+- **通用体检（两台都做）**：本机直接运行 mac-system-toolkit 的综合健康检查；远程机经 `ssh wj` 运行同一能力（脚本随子模块在两机都有）。
+- **双机特有项（通用体检不管，下列命令可直接执行）**：
 
 ```bash
-# === 本机 ===
-# 资源/内存
-top -l 1 -n 0 | head -20
-vm_stat | head -10
-memory_pressure | tail -3
-
-# 磁盘
-df -h
-# 各卷用量
-df -h / /Volumes/* 2>/dev/null
-
-# Home 目录大户
-du -sh ~/* | sort -rh | head -10
-
-# 高内存进程
-ps -Ao rss,comm | sort -rn | head -10
-
-# 待更新
-softwareupdate -l
-
-# iOS 模拟器占用
+# 远程 .9：ssh-agent 三把 key、git/gh 身份、各机卷容量
+ssh wj 'ssh-add -l 2>&1; echo "---"; git config --global --get credential.helper; echo "---"; df -h / /Volumes/* 2>/dev/null'
+# 本机 .8：iOS 模拟器卷占用（问题 4）、系统待更新
 xcrun simctl list devices unavailable | head
+softwareupdate -l
+# 任一台：Home 目录大户（.9 盘点时 ~/Doubao 异常大，见第六节）
+du -sh ~/* | sort -rh | head
 ```
 
-```bash
-# === 远程机（经 ssh）===
-ssh wj 'top -l 1 -n 0 | head -20; echo "---"; vm_stat | head -10; echo "---"; df -h; echo "---"; du -sh ~/* | sort -rh | head -10; echo "---"; ssh-add -l 2>&1; echo "---"; git config --global --get credential.helper'
-```
-
-> 远程机命令一次性覆盖：CPU/内存、磁盘、Home 大户、ssh-agent 状态、git credential 状态——即第二节 4 个 🔴 项的快速复查。
+- ssh-agent / git credential / 密钥身份的标准状态见本技能 security-and-git.md。
