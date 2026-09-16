@@ -92,7 +92,7 @@ ssh wj '/usr/local/bin/code --list-extensions'
 
 | 分类 | 软件 | 备注 |
 |---|---|---|
-| 浏览器 | Chrome Gemini, Gemini 2, UC | — |
+| 浏览器 | Chrome Gemini, UC | Gemini 2（MacPaw 重复文件清理，非浏览器）2026-09-16 验出 TNT 破解签名，已卸载入废纸篓 |
 | 通讯 | WeChat_backup_37335.app, WeChat_tampered_37342.app | **历史多开试验遗留（已废弃，见下）** |
 | 办公 | Microsoft Outlook, Microsoft OneNote, LibreOffice, PDF Expert, PDF Professional Suite, Foxit Phantom | PDF 工具集中 |
 | 设计/媒体 | GIMP, Aerial（屏保）, res-downloader | — |
@@ -103,6 +103,12 @@ ssh wj '/usr/local/bin/code --list-extensions'
 > 📌 **特别注意**：
 > - **微信多开（WeChat_backup / WeChat_tampered）是历史试验遗留，已验证会触发风控封号，方案废弃、不要再复活、不要当能力使用**；当前统一为单官方 App 内切换账号（见 wechat-control 技能 new-account-sop §A.4.2）。这两个 .app 在远程机上，是否删除由用户决定，不擅删。
 > - Warp、Devin（AI 开发任务）、Macs Fan Control（黑苹果散热监控）才是远程机的角色特征，保留。
+
+> 🔓 **软件来源/签名核验（2026-09-16，wj `/Applications` 全量 `codesign -dvvv`）**：
+> - **确认破解**：Gemini 2（TNT 署名，**已卸载入废纸篓**）；PDF Expert（Authority=Antibiotics 破解团队署名）；Parallels Desktop（ad-hoc 重签 + `Contents/Frameworks/CoreInject.dylib` 激活注入，cw 侧还有 com.lihaoyun6.PD-Runner-Helper 常驻）。
+> - **疑似破解重签**（官方本有 Developer ID 签名，实测 ad-hoc）：Beyond Compare、CleanMyMac X。
+> - ad-hoc 但属正常：开源/国产小工具（豆包浏览器、QtScrcpy、RDM、res-downloader、OpenCore Configurator 等）。
+> - 处置原则：不擅删；商业软件建议换正版/商店版（Navicat Premium、Xnip 为 App Store 正版签名）。CleanMyMac X 带 root 特权助手常驻，风险优先级最高。
 
 ### 4.4 代理客户端与端口（双机台账，用时仍以现场探测为准）
 

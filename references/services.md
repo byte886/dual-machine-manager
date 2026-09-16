@@ -161,7 +161,7 @@ printf '%s\n' "$SUDOPASS" | ssh cw 'sudo -S -p "" sfltool dumpbtm'
 | CleanMyMac X（2 项） | 开 | HealthMonitor + Menu 登录项 | 常驻价值低，可关后台、用时手动开 |
 | **cloudflared**（不明） | 开 | `com.user.cloudflared-power`（见 2.1） | **自建**远程关机隧道，保留 |
 | **com.macpaw.CleanMyMac4.Agent**（不明） | 开 | `/Library/PrivilegedHelperTools/` 下 CleanMyMac X root 助手 | 随 CleanMyMac X 去留 |
-| Gemini 2 | dump 为关 | MacPaw 重复文件清理，菜单登录项 | 不用可卸（常随 CleanMyMac 捆绑） |
+| ~~Gemini 2~~ | **2026-09-16 已卸载**（App+支持文件共约 392MB，全部进废纸篓可恢复） | 验签发现是 **TNT 破解版**（BTM Developer Name: "TNT - why join the navy if you can be a pirate"）；BTM 残留墓碑记录在下次登录/重启后从列表消失 |
 | **Hainan Youqu Technology Co., Ltd.** | 开 | **即 ToDesk 开发商「海南有趣科技」标识组**（com.youqu.todesk.*） | 随 ToDesk 去留，非陌生程序 |
 | HP Device Monitor Manager / HP Inc. | 关 | `/Library/Printers/hp/...` | 无 HP 打印机可整组清 |
 | HP Product Research Manager | GUI 关，`com.hp.productresearch.plist`（KeepAlive）仍在用户目录，当前未加载 | HP 产品改进遥测 | 纯遥测，建议删 plist |
@@ -177,6 +177,8 @@ printf '%s\n' "$SUDOPASS" | ssh cw 'sudo -S -p "" sfltool dumpbtm'
 | Xnip | 开 | App + XnipLoginHelperApp | 截图工具，保留（2026-09-16 起双机均有） |
 
 另：「登录时打开」段（截图未含）开启的有 Aerial、Alfred 5、CheatSheet、豆包；Outlook、Parallels Desktop、Warp 等为关。共享扩展（OneNote、Tailscale、信息、发送到微信、Send with Windows Email App=Parallels 带来）均为各 App 正常注册项。
+
+> 🔓 **2026-09-16 验签安全发现（wj，用户已知悉、暂不处理）**：PDF Expert 签名 Authority=Antibiotics（破解团队署名，确认破解版）；Parallels Desktop 为 ad-hoc 签名且内含 `CoreInject.dylib`（激活注入，配合 cw 的 PD-Runner-Helper）；Beyond Compare、CleanMyMac X 为 ad-hoc 重签（疑似破解，官方本有 Developer ID 签名）。**CleanMyMac X 的 root 特权助手常驻运行，破解重签版风险最高，优先建议换正版或卸载。** 验签命令：`codesign -dvvv /Applications/<App>.app | grep Authority`。
 
 ### 4.2 cw（.8）后台项要点（2026-09-16 sudo dump）
 
