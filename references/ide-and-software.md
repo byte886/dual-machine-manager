@@ -70,7 +70,7 @@ ssh wj '/usr/local/bin/code --list-extensions'
 | 通讯 | WeChat, 企业微信, QQ, Telegram, Lark(飞书), TencentMeeting |
 | 办公 | Microsoft Word / Excel / PowerPoint, wpsoffice, OneDrive |
 | 开发工具 | iTerm, Postman, Navicat Premium, Commander One, RDM(Redis), QtScrcpy |
-| 系统工具 | Alfred 5, Spectacle, Keka, CheatSheet, Tuxera Disk Manager, OCLP-Mod, OpenCore Configurator, Blackmagic Disk Speed Test |
+| 系统工具 | Alfred 5, Spectacle, Keka, CheatSheet, Tuxera Disk Manager, OCLP-Mod, OpenCore Configurator, Blackmagic Disk Speed Test, Xnip（2026-09-16 起双机，见 4.5） |
 | 远程/网络 | RustDesk, Tailscale, BaiduNetdisk_mac |
 | 其他 | IINA, ACE Studio, 元宝, 抖音, 汽水音乐, Doubao, WorkBuddy |
 
@@ -97,7 +97,7 @@ ssh wj '/usr/local/bin/code --list-extensions'
 | 办公 | Microsoft Outlook, Microsoft OneNote, LibreOffice, PDF Expert, PDF Professional Suite, Foxit Phantom | PDF 工具集中 |
 | 设计/媒体 | GIMP, Aerial（屏保）, res-downloader | — |
 | 开发工具 | Warp, QClaw, Devin, DoubaoWork, LANDrop | Warp/Devin 为本机无 |
-| 系统工具 | CleanMyMac X, **Macs Fan Control**, Xnip, SogouInputSwitchHelper, lghub, REALFORCE Connect | Macs Fan Control = 黑苹果散热监控 |
+| 系统工具 | CleanMyMac X, **Macs Fan Control**, SogouInputSwitchHelper, lghub, REALFORCE Connect | Macs Fan Control = 黑苹果散热监控；Xnip 已双机化移出本表 |
 | 远程/网络 | ToDesk, UURemote, ClashX Pro, Proxifier | 远程机自带远程桌面栈 |
 
 > 📌 **特别注意**：
@@ -118,6 +118,37 @@ ssh wj '/usr/local/bin/code --list-extensions'
 ```bash
 curl -x http://127.0.0.1:<port> --max-time 5 -o /dev/null -w "%{http_code}\n" https://www.google.com
 ```
+
+### 4.5 App Store 应用直拷迁移 SOP（以 Xnip 为例，2026-09-16 wj → cw 实测）
+
+适用：对端 App Store 不便交互（`mas install` 经 SSH 弹商店对话框被取消，ISErrorDomain -128），而 App 本身是免费/已购功能、无需重新换发凭证的场景。**Pro/订阅类 IAP 仍须同 Apple ID「恢复购买」，直拷不转移购买关系。**
+
+```bash
+# 源机（wj）：打包 App 与配置（App 18M，配置 3 个小文件）
+tar -czf /tmp/Xnip-app.tgz -C /Applications Xnip.app
+tar -czf /tmp/Xnip-config.tgz -C "$HOME" \
+  "Library/Containers/com.zzd.Xnip/Data/Library/Preferences/com.zzd.Xnip.plist" \
+  "Library/Group Containers/ME7L72N3S3.group.com.zzd.Xnip/Library/Preferences/ME7L72N3S3.group.com.zzd.Xnip.plist" \
+  "Library/Group Containers/ME7L72N3S3.group.com.zzd.Xnip/XnipHelperToolDefault.json"
+scp /tmp/Xnip-*.tgz cw:/tmp/
+
+# 目标机（cw）：sudo 解包到 /Applications 并还原属主（sudo 口令见 credentials.md）
+sudo tar -xzf /tmp/Xnip-app.tgz -C /Applications/ && sudo chown -R root:wheel /Applications/Xnip.app
+codesign --verify --deep --strict /Applications/Xnip.app
+spctl --assess --type execute -vv /Applications/Xnip.app   # 期望 accepted / source=Mac App Store
+open -a Xnip                                               # 先启动一次，让系统自建 Containers
+sleep 10
+osascript -e 'quit app "Xnip"' && sleep 3
+tar -xzf /tmp/Xnip-config.tgz -C "$HOME"                   # 再灌配置（快捷键/标注样式/JPEG/开机启动偏好）
+open -a Xnip
+```
+
+实测结论与坑：
+- scp/tar 不产生 quarantine 属性，Gatekeeper 按原始 MAS 签名放行；`_MASReceipt` 随包复制，免费功能（wj 实测无 Pro IAP 凭证）直接可用。
+- **TCC 权限按 bundle id 落库**：cw 历史上装过 Xnip，屏幕录制授权仍在（系统 TCC 库 auth_value=2）；全新机器需在 GUI 手动授屏幕录制（必要时还有辅助功能），无法 SSH 代授。
+- **开机登录项不能随复制迁移**：SMAppService 注册关系在目标机 BTM 库里；需在目标机打开 Xnip 偏好设置，把「开机启动」关一次再开一次完成注册（SSH 调 System Events 会卡在自动化授权弹窗）。
+- 直拷版 App Store **不推送更新**（商店当前 2.5.0，直拷为 wj 的 2.2.6）；要更新就在目标机用同一 Apple ID 在商店「获取」一次接管，或定期重拷。
+- cw 已装 `mas`（brew，v7.0.0，安装类子命令需 root：`sudo mas install <id>`，且只能装该 Apple ID 已获取过的 App；`mas account` 子命令已移除，用 `mas list` 判断登录态）。
 
 ---
 
