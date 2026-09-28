@@ -22,6 +22,12 @@
 
 > **网络实测（2026-09-16，两台一致）**：内网走**有线网卡 en0（Ethernet）**，.8=192.168.2.8、.9=192.168.2.9，默认路由均经 en0、网关 192.168.2.1；en1 是 Wi-Fi，当前未取 IPv4（未连）。双向 ping/SSH 通。历史上的 192.168.2.14、旧网段 192.168.10.x、公网云主机均为旧工作残留，已从两机 SSH config 清除。
 
+> **Tailscale 与系统代理（wj，2026-09-23 实测）**：wj 网络服务（`networksetup -listallnetworkservices`）顺序为 Built-in Serial Port / **Ethernet（有线 en0，主服务）** / Wi-Fi（en1，未连） / **Tailscale（NetworkExtension，utun，虚拟）**。Tailscale CLI 1.102.3，**未用 exit node（ExitNodeID 为空，开启不改默认路由）**，RouteAll=True（接受子网路由）、CorpDNS=True（MagicDNS 接管 DNS）。
+> - **冲突教训**：早期 MITM 探针（multiplatform-content-pipeline 的 video-capture）对"所有有 IP 的服务"设系统代理，Tailscale 开启时 utun 有 IP 被误设；探针停止时若 Tailscale 已关则漏清，在 Tailscale 服务残留指向 `127.0.0.1:8899` 的"死代理"，一开 Tailscale 即断网。
+> - **已修复**：探针改为只对默认路由的物理服务（Ethernet/en0，凭真实 MAC 判定）设代理、设置前快照、退出恢复原样，**永不触碰 Tailscale**；ClashX 的 7890 状态也不再被破坏。
+> - **历史残留清理**：Tailscale stopped 时 networksetup 改不了它（exit=5），须在 Tailscale 运行时执行 multiplatform-content-pipeline 仓的 `scripts/fix_tailscale_proxy.sh`。
+> - **使用规则**：Tailscale 可常开、与采集共存；**不要开 exit node**；不要在探针正运行（Ethernet=8899）瞬间切换 Tailscale。
+
 ---
 
 ## 二、硬件配置详表（2026-09-15 实测）
