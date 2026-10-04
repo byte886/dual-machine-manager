@@ -19,8 +19,8 @@ compatibility: macOS（已验证：macOS 15.7.8 x86_64，两台机器均为 Mac�
 
 | 别名 | 主机名 | 用户名 | IP | 定位 |
 |---|---|---|---|---|
-| `cw`（本机） | 192.168.2.8 | chenwenjie | 192.168.2.8 | 全能工作站，931GB，Homebrew（/usr/local） |
-| `wj`（远程） | 192.168.2.9 | wenjiechen | 192.168.2.9 | 黑苹果，3.7TB，Homebrew 在 /usr/local（非交互 SSH 的 PATH 不含它，命令用绝对路径或先补 PATH） |
+| `cw`（本机） | 192.168.2.16 | chenwenjie | 192.168.2.16 | 全能工作站，931GB，Homebrew（/usr/local）（静态 IP，2026-10-04 起） |
+| `wj`（远程） | 192.168.2.15 | wenjiechen | 192.168.2.15 | 黑苹果，3.7TB，Homebrew 在 /usr/local（非交互 SSH 的 PATH 不含它，命令用绝对路径或先补 PATH） |
 
 - SSH 互访：本机 `ssh wj` → 远程机；远程机 `ssh cw` → 本机（已互配免密 + ControlMaster）
 - 双机同步：`~/Doubao` git 仓库，**两台机器都可直接提交并 push**；对端只做快进对齐（fetch → 确认无未推送提交 → `merge --ff-only` → 子模块更新），**禁止 `git pull`**，详见 references/sop.md 第二节

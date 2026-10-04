@@ -108,8 +108,8 @@ fi
 | `103.103.245.177` | 旧公网跳板（.9 经其 `:8020` ProxyJump 回内网） | 超时/无路由 | 已退役，删 Host 及下游 ProxyJump |
 | `192.168.10.101~104` | 旧内网网段服务器，root | 在 192.168.2.x 网段不可达 | 已退役，两机删 Host |
 
-- 现内网统一为 **192.168.2.x（有线 en0）**：.8=192.168.2.8、.9=192.168.2.9，网关 192.168.2.1，双向 ping/SSH 通（详见 machines.md）。
-- **ControlMaster 复用套接字不是垃圾**：`~/.ssh/cm-<user>@<host>:<port>`（如 `cm-wenjiechen@192.168.2.9:22`）是活动的多路复用 socket；`ssh -O check <别名>` 显示 `Master running` 即在用，勿当残留删，连接彻底关闭后按 ControlPersist 自动消失。
+- 现内网统一为 **192.168.2.x（有线 en0）**：.16=192.168.2.16（chenwenjie 机，静态 IP）、.15=192.168.2.15（wenjiechen 机，DHCP），网关 192.168.2.1，双向 ping/SSH 通（详见 machines.md）。
+- **ControlMaster 复用套接字不是垃圾**：`~/.ssh/cm-<user>@<host>:<port>`（如 `cm-wenjiechen@192.168.2.15:22`）是活动的多路复用 socket；`ssh -O check <别名>` 显示 `Master running` 即在用，勿当残留删，连接彻底关闭后按 ControlPersist 自动消失。
 - **已删历史/留底文件（2026-09-16）**：.8 `config.bak-byte886-20260915-114705`；.9 `config.bak-20260914-cm`、`config.bak-agent-20260915-121111`、`known_hosts.old`，以及密钥对齐留底 `id_ed25519` / `id_rsa` 的 `*.migrated-bak-20260915`（含 .pub，云主机退役后无回退价值）。
 
 ### 备用：跳板机 ProxyJump 通用配法（当前无在用跳板，留作后用）

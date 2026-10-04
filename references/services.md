@@ -4,7 +4,7 @@
 
 ---
 
-## 一、本机（cw / 192.168.2.8）
+## 一、本机（cw / 192.168.2.16）
 
 ### 1.1 用户级 launchd 服务（~/Library/LaunchAgents/）
 
@@ -51,7 +51,7 @@ brew services restart <name>         # 重启
 
 ---
 
-## 二、远程机（wj / 192.168.2.9，黑苹果）
+## 二、远程机（wj / 192.168.2.15，黑苹果）
 
 ### 2.1 用户级 launchd 服务（~/Library/LaunchAgents/）
 

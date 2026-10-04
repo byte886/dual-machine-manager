@@ -1,6 +1,6 @@
 # 包管理工具深度盘点
 
-> 本机 `cw` = chenwenjie @ 192.168.2.8；远程机 `wj` = wenjiechen @ 192.168.2.9（黑苹果）。
+> 本机 `cw` = chenwenjie @ 192.168.2.16（静态 IP）；远程机 `wj` = wenjiechen @ 192.168.2.15（黑苹果）。
 > 两台都装 Homebrew（prefix 均为 /usr/local）；版本/包数量是易变时点值，以现场 `brew list` / `<cmd> --version` 实测为准。
 > **关键坑**：远程机非交互 SSH 的 PATH 不含 /usr/local/bin，`ssh wj brew` 会误报 command not found——用 `/usr/local/bin/brew` 或先 `export PATH=/usr/local/bin:$PATH`，并非没装。
 

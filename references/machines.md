@@ -10,9 +10,9 @@
 | 项目 | 本机（主力 cw） | 远程机（黑苹果 wj） |
 |---|---|---|
 | 别名 | `cw` | `wj` |
-| 主机名 | `192.168.2.8` | `192.168.2.9` |
+| 主机名 | `192.168.2.16` | `192.168.2.15` |
 | 用户名 | `chenwenjie` | `wenjiechen` |
-| 内网 IP（有线 en0） | `192.168.2.8`（en0 Ethernet；en1 Wi-Fi 当前未连） | `192.168.2.9`（en0 Ethernet；en1 Wi-Fi 当前未连） |
+| 内网 IP（有线 en0） | `192.168.2.16`（静态 IP，en0 Ethernet；en1 Wi-Fi 当前未连） | `192.168.2.15`（DHCP，en0 Ethernet；en1 Wi-Fi 当前未连） |
 | MAC 地址(en0) | `a0:36:bc:28:43:b3` | `c8:7f:54:69:eb:7b` |
 | 机型标识（SMBIOS） | Mac Pro（**MacPro7,1，黑苹果伪装机型**） | Mac Pro（**MacPro7,1，黑苹果伪装机型**） |
 | 系统 | macOS 15.7.8 (24G824) | macOS 15.7.8 (24G824) |
@@ -21,6 +21,7 @@
 | git 用户 | softwarecheng / softwarecheng@126.com（以 ~/.gitconfig 为准） | softwarecheng / softwarecheng@126.com |
 
 > **网络实测（2026-09-16，两台一致）**：内网走**有线网卡 en0（Ethernet）**，.8=192.168.2.8、.9=192.168.2.9，默认路由均经 en0、网关 192.168.2.1；en1 是 Wi-Fi，当前未取 IPv4（未连）。双向 ping/SSH 通。历史上的 192.168.2.14、旧网段 192.168.10.x、公网云主机均为旧工作残留，已从两机 SSH config 清除。
+> **IP 更新（2026-10-04 实测）**：旧 `.8`/`.9` 均已失效（.8 已被局域网内其他设备占用、.9 无响应）。已将 chenwenjie 机（原 .8）Ethernet 改为**静态 IP `192.168.2.16`**（DNS 固定 `114.114.114.114` + `192.168.2.1`，经 sudo networksetup 设置并验证互通）；wenjiechen 机（原 .9）当前 DHCP 取到 `192.168.2.15`（未固定）。两机 SSH config 已同步：`.16` 配 `cw`、`.15` 配 `wj`。
 
 > **Tailscale 与系统代理（wj，2026-09-23 实测）**：wj 网络服务（`networksetup -listallnetworkservices`）顺序为 Built-in Serial Port / **Ethernet（有线 en0，主服务）** / Wi-Fi（en1，未连） / **Tailscale（NetworkExtension，utun，虚拟）**。Tailscale CLI 1.102.3，**未用 exit node（ExitNodeID 为空，开启不改默认路由）**，RouteAll=True（接受子网路由）、CorpDNS=True（MagicDNS 接管 DNS）。
 > - **冲突教训**：早期 MITM 探针（multiplatform-content-pipeline 的 video-capture）对"所有有 IP 的服务"设系统代理，Tailscale 开启时 utun 有 IP 被误设；探针停止时若 Tailscale 已关则漏清，在 Tailscale 服务残留指向 `127.0.0.1:8899` 的"死代理"，一开 Tailscale 即断网。
@@ -33,6 +34,7 @@
 ## 二、硬件配置详表（2026-09-15 实测）
 
 > 两台均为 x86 黑苹果（非 Apple 原生芯片），SMBIOS 统一伪装成 MacPro7,1；下列为实测值，占用/可用量以现场命令为准。
+> 2026-10-04 SSH 复测：CPU（i5-12600K，10 物理核/16 逻辑核）、内存（64GB）、SMBIOS（MacPro7,1 / board-id Mac-27AD2F918AE68F61）均与下表一致。
 
 | 硬件项 | 本机 cw（全能工作站） | 远程机 wj（编译/服务器） |
 |---|---|---|
@@ -61,15 +63,15 @@ df -h                                    # 磁盘与可用量
 两台机器已互配公钥免密登录，SSH config 中互为别名。
 
 ### 本机 → 远程机
-- 别名：`wj`（也可直接用 IP `192.168.2.9`）
+- 别名：`wj`（也可直接用 IP `192.168.2.15`）
 - 命令：`ssh wj`
-- 配置位置：`~/.ssh/config` 中 `Host 192.168.2.9 wj`
+- 配置位置：`~/.ssh/config` 中 `Host 192.168.2.15 wj`
 - 关键参数：`ControlMaster auto`（多路复用，10 分钟保持）、`ServerAliveInterval 30`、`ConnectTimeout 6`
 
 ### 远程机 → 本机
-- 别名：`cw`（也可直接用 IP `192.168.2.8`）
+- 别名：`cw`（也可直接用 IP `192.168.2.16`）
 - 命令：`ssh cw`
-- 配置位置：远程机 `~/.ssh/config` 中 `Host 192.168.2.8 cw`
+- 配置位置：远程机 `~/.ssh/config` 中 `Host 192.168.2.16 cw`
 
 ### SSH 密钥（两台同步）
 - `~/.ssh/id_rsa` — 默认 RSA 密钥（GitHub Web3Stack404 账号用）
@@ -78,9 +80,9 @@ df -h                                    # 磁盘与可用量
 
 > ssh-agent 加载状态、钥匙串见 [ssh-keys-and-config.md](ssh-keys-and-config.md)；GitHub 多账号分流见 [git-and-github-accounts.md](git-and-github-accounts.md)。
 
-### SSH config 中的 Host（2026-09-16 清理后）
-- **双机互访**：`.8` 配 `wj`（192.168.2.9），`.9` 配 `cw`（192.168.2.8），均带 ControlMaster 复用
-- **GitHub**：`.8` 三账号别名 `github.com`（byte886 主力）、`github-tinyverse`、`github-web3`；`.9` 仅主力 `github.com`
+### SSH config 中的 Host（2026-10-04 更新后）
+- **双机互访**：`.16`（chenwenjie 机）配 `wj`（192.168.2.15），`.15`（wenjiechen 机）配 `cw`（192.168.2.16），均带 ControlMaster 复用
+- **GitHub**：`.16` 三账号别名 `github.com`（byte886 主力）、`github-tinyverse`、`github-web3`；`.15` 仅主力 `github.com`
 - 旧公网云服务器（103.234.53.68 / 103.103.245.177 / 39.108.96.46）、旧内网网段 192.168.10.101~104，以及 `.9` 经 103.103.245.177:8020 的 ProxyJump，均为旧工作残留，已从两机 config 删除（跳板机 ProxyJump 通用配法见 [ssh-keys-and-config.md](ssh-keys-and-config.md) 第五节备用小节）
 
 ---
