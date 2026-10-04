@@ -12,7 +12,7 @@
 | 别名 | `cw` | `wj` |
 | 主机名 | `192.168.2.16` | `192.168.2.15` |
 | 用户名 | `chenwenjie` | `wenjiechen` |
-| 内网 IP（有线 en0） | `192.168.2.16`（静态 IP，en0 Ethernet；en1 Wi-Fi 当前未连） | `192.168.2.15`（DHCP，en0 Ethernet；en1 Wi-Fi 当前未连） |
+| 内网 IP（有线 en0） | `192.168.2.16`（静态 IP，en0 Ethernet；en1 Wi-Fi 当前未连） | `192.168.2.15`（静态 IP，en0 Ethernet；en1 Wi-Fi 当前未连） |
 | MAC 地址(en0) | `a0:36:bc:28:43:b3` | `c8:7f:54:69:eb:7b` |
 | 机型标识（SMBIOS） | Mac Pro（**MacPro7,1，黑苹果伪装机型**） | Mac Pro（**MacPro7,1，黑苹果伪装机型**） |
 | 系统 | macOS 15.7.8 (24G824) | macOS 15.7.8 (24G824) |
@@ -21,7 +21,7 @@
 | git 用户 | softwarecheng / softwarecheng@126.com（以 ~/.gitconfig 为准） | softwarecheng / softwarecheng@126.com |
 
 > **网络实测（2026-09-16，两台一致）**：内网走**有线网卡 en0（Ethernet）**，.8=192.168.2.8、.9=192.168.2.9，默认路由均经 en0、网关 192.168.2.1；en1 是 Wi-Fi，当前未取 IPv4（未连）。双向 ping/SSH 通。历史上的 192.168.2.14、旧网段 192.168.10.x、公网云主机均为旧工作残留，已从两机 SSH config 清除。
-> **IP 更新（2026-10-04 实测）**：旧 `.8`/`.9` 均已失效（.8 已被局域网内其他设备占用、.9 无响应）。已将 chenwenjie 机（原 .8）Ethernet 改为**静态 IP `192.168.2.16`**（DNS 固定 `114.114.114.114` + `192.168.2.1`，经 sudo networksetup 设置并验证互通）；wenjiechen 机（原 .9）当前 DHCP 取到 `192.168.2.15`（未固定）。两机 SSH config 已同步：`.16` 配 `cw`、`.15` 配 `wj`。
+> **IP 更新（2026-10-04 实测）**：旧 `.8`/`.9` 均已失效（.8 已被局域网内其他设备占用、.9 无响应）。两台 Ethernet 均已改为**静态 IP**：chenwenjie 机（原 .8）= `192.168.2.16`，wenjiechen 机（原 .9）= `192.168.2.15`；DNS 均固定 `114.114.114.114` + `192.168.2.1`（经 sudo networksetup 设置并验证互通）。两机 SSH config 已同步：`.16` 配 `cw`、`.15` 配 `wj`。
 
 > **Tailscale 与系统代理（wj，2026-09-23 实测）**：wj 网络服务（`networksetup -listallnetworkservices`）顺序为 Built-in Serial Port / **Ethernet（有线 en0，主服务）** / Wi-Fi（en1，未连） / **Tailscale（NetworkExtension，utun，虚拟）**。Tailscale CLI 1.102.3，**未用 exit node（ExitNodeID 为空，开启不改默认路由）**，RouteAll=True（接受子网路由）、CorpDNS=True（MagicDNS 接管 DNS）。
 > - **冲突教训**：早期 MITM 探针（multiplatform-content-pipeline 的 video-capture）对"所有有 IP 的服务"设系统代理，Tailscale 开启时 utun 有 IP 被误设；探针停止时若 Tailscale 已关则漏清，在 Tailscale 服务残留指向 `127.0.0.1:8899` 的"死代理"，一开 Tailscale 即断网。
