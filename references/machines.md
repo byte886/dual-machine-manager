@@ -34,10 +34,11 @@
 ## 二、硬件配置详表（2026-09-15 实测）
 
 > 两台均为 x86 黑苹果（非 Apple 原生芯片），SMBIOS 统一伪装成 MacPro7,1；下列为实测值，占用/可用量以现场命令为准。
-> 2026-10-04 SSH 复测：CPU（i5-12600K，10 物理核/16 逻辑核）、内存（64GB）、SMBIOS（MacPro7,1 / board-id Mac-27AD2F918AE68F61）均与下表一致。
+> 2026-10-04 SSH 复测：CPU（i5-12600K，10 物理核/16 逻辑核）、内存（64GB）、SMBIOS（MacPro7,1 / board-id Mac-27AD2F918AE68F61）均与下表一致；物理主板同日经 BIOS 实拍确认为 **ASUS TUF GAMING B660M-E D4（BIOS Ver. 1620）**。
 
 | 硬件项 | 本机 cw（全能工作站） | 远程机 wj（编译/服务器） |
 |---|---|---|
+| 物理主板（真实） | **ASUS TUF GAMING B660M-E D4**，BIOS Ver. 1620（2026-10-04 BIOS 实拍） | —（未查） |
 | CPU | 12th Gen Intel **i5-12600K** @3.68GHz，10 核（1 颗） | 13th Gen Intel **i5-13600KF** @3.5GHz，14 核（1 颗，无核显） |
 | 内存 | **64 GB** | **128 GB** |
 | 显卡 | AMD Radeon **RX 460/560，2GB VRAM** | AMD Radeon **RX 460/560，4GB VRAM** |
