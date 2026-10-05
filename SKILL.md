@@ -32,6 +32,7 @@ compatibility: macOS（已验证：macOS 15.7.8 x86_64，两台机器均为 Mac�
 |---|---|---|
 | [references/machines.md](references/machines.md) | 需要机器详细信息、硬件型号配置、SSH 配置、网络参数时 | 两台机器硬件（CPU/内存/显卡/磁盘/SMBIOS 实测详表）/系统/网络/SSH 完整档案、互访配置、同步约定、排查命令 |
 | [references/services.md](references/services.md) | 需要查看/管理后台服务、launchd、brew、cron 时 | 两台机器所有后台服务清单、服务管理通用 SOP、远程服务操作 |
+| [references/clashx-proxy.md](references/clashx-proxy.md) | 需要命令行开关 ClashX Pro 系统代理、切换出站模式时 | ClashX Pro 官方 AppleScript 通道（toggleProxy/proxyMode）、封装脚本 proxy-on/off/mode/status、Clash 引擎 API(61111) 能力边界与凭证读取方式 |
 | [references/credentials.md](references/credentials.md) | 需要密码、token、密钥等凭证，或要查"哪个工具需要什么凭证/存哪"时 | 需要凭证的工具总览矩阵、双机 `.enc` 实测台账、sudo 密码、SSH 密钥、GitHub PAT（byte886 加密落点/gh 登录/双机同步）、关机 Webhook token、OpenToken 凭证的位置与管理方式（只记台账事实，敏感值不写明文） |
 | [references/opentoken.md](references/opentoken.md) | 需要安装/验证/卸载/排查 OpenToken（TokenRank）时 | OpenToken 全流程 SOP：安装、验证（必做四项）、常用命令、文件位置、卸载、故障排查、当前部署状态 |
 | [references/sop.md](references/sop.md) | 需要执行标准运维流程时 | 日常巡检、双机同步、服务管理、远程关机、故障排查、新工具接入、凭证轮换等 SOP |
