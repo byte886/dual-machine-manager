@@ -1,6 +1,6 @@
 ---
 name: dual-machine-manager
-description: 两台 Mac（本机 cw + 远程黑苹果 wj）的统一运维管家。覆盖系统信息、SSH 互访、launchd/brew/cron 后台服务、凭证落点台账、OpenToken/TokenRank、远程关机、双机同步、日常巡检、故障排查；并沉淀双机盘点：包管理器（Homebrew/mise/cargo/npm/pip）、IDE 与软件、SSH/密钥/钥匙串/Git/GitHub 多账号、机器健康度、双机差异一致性。当用户提到两台机器、机器管家、巡检、服务状态、后台进程、远程关机、双机同步、OpenToken、wj/黑苹果、凭证、包管理、Homebrew、IDE、ssh-agent、GitHub 多账号、磁盘/内存健康度、双机差异一致性等运维需求时使用。
+description: 两台 Mac（本机 cw + 远程黑苹果 wj）的统一运维管家。覆盖系统信息、SSH 互访、远程访问（RustDesk/Tailscale）、launchd/brew/cron 后台服务、凭证落点台账、OpenToken/TokenRank、远程关机、双机同步、日常巡检、故障排查；并沉淀双机盘点：包管理器（Homebrew/mise/cargo/npm/pip）、IDE 与软件、SSH/密钥/钥匙串/Git/GitHub 多账号、机器健康度、双机差异一致性。当用户提到两台机器、机器管家、巡检、服务状态、后台进程、远程关机、双机同步、OpenToken、wj/黑苹果、凭证、包管理、Homebrew、IDE、ssh-agent、GitHub 多账号、磁盘/内存健康度、双机差异一致性等运维需求时使用。
 compatibility: macOS（已验证：macOS 15.7.8 x86_64，两台机器均为 Mac）；未验证 Windows / Linux
 ---
 
@@ -32,6 +32,7 @@ compatibility: macOS（已验证：macOS 15.7.8 x86_64，两台机器均为 Mac�
 |---|---|---|
 | [references/machines.md](references/machines.md) | 需要机器详细信息、硬件型号配置、SSH 配置、网络参数时 | 两台机器硬件（CPU/内存/显卡/磁盘/SMBIOS 实测详表）/系统/网络/SSH 完整档案、互访配置、同步约定、排查命令 |
 | [references/services.md](references/services.md) | 需要查看/管理后台服务、launchd、brew、cron 时 | 两台机器所有后台服务清单、服务管理通用 SOP、远程服务操作 |
+| [references/remote-access.md](references/remote-access.md) | 需要看两台机器远程访问（RustDesk ID/版本、Tailscale 节点对照、互联状态）时 | RustDesk（双机 ID/版本/服务/密码状态/连接路径）与 Tailscale（节点对照表）档案，含 2026-10-05 互联实测记录 |
 | [references/clashx-proxy.md](references/clashx-proxy.md) | 需要命令行开关 ClashX Pro 系统代理、切换出站模式时 | ClashX Pro 官方 AppleScript 通道（toggleProxy/proxyMode）、封装脚本 proxy-on/off/mode/status、Clash 引擎 API(61111) 能力边界与凭证读取方式 |
 | [references/credentials.md](references/credentials.md) | 需要密码、token、密钥等凭证，或要查"哪个工具需要什么凭证/存哪"时 | 需要凭证的工具总览矩阵、双机 `.enc` 实测台账、sudo 密码、SSH 密钥、GitHub PAT（byte886 加密落点/gh 登录/双机同步）、关机 Webhook token、OpenToken 凭证的位置与管理方式（只记台账事实，敏感值不写明文） |
 | [references/opentoken.md](references/opentoken.md) | 需要安装/验证/卸载/排查 OpenToken（TokenRank）时 | OpenToken 全流程 SOP：安装、验证（必做四项）、常用命令、文件位置、卸载、故障排查、当前部署状态 |
