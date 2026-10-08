@@ -24,9 +24,9 @@
 > **IP 更新（2026-10-04 实测）**：旧 `.8`/`.9` 均已失效（.8 已被局域网内其他设备占用、.9 无响应）。两台 Ethernet 均已改为**静态 IP**：chenwenjie 机（原 .8）= `192.168.2.16`，wenjiechen 机（原 .9）= `192.168.2.15`；DNS 均固定 `114.114.114.114` + `192.168.2.1`（经 sudo networksetup 设置并验证互通）。两机 SSH config 已同步：`.16` 配 `cw`、`.15` 配 `wj`。
 
 > **Tailscale 与系统代理（wj，2026-09-23 实测）**：wj 网络服务（`networksetup -listallnetworkservices`）顺序为 Built-in Serial Port / **Ethernet（有线 en0，主服务）** / Wi-Fi（en1，未连） / **Tailscale（NetworkExtension，utun，虚拟）**。Tailscale CLI 1.102.3，**未用 exit node（ExitNodeID 为空，开启不改默认路由）**，RouteAll=True（接受子网路由）、CorpDNS=True（MagicDNS 接管 DNS）。
-> - **冲突教训**：早期 MITM 探针（multiplatform-content-pipeline 的 video-capture）对"所有有 IP 的服务"设系统代理，Tailscale 开启时 utun 有 IP 被误设；探针停止时若 Tailscale 已关则漏清，在 Tailscale 服务残留指向 `127.0.0.1:8899` 的"死代理"，一开 Tailscale 即断网。
+> - **冲突教训**：早期 MITM 探针（content-pipeline 的 video-capture）对"所有有 IP 的服务"设系统代理，Tailscale 开启时 utun 有 IP 被误设；探针停止时若 Tailscale 已关则漏清，在 Tailscale 服务残留指向 `127.0.0.1:8899` 的"死代理"，一开 Tailscale 即断网。
 > - **已修复**：探针改为只对默认路由的物理服务（Ethernet/en0，凭真实 MAC 判定）设代理、设置前快照、退出恢复原样，**永不触碰 Tailscale**；ClashX 的 7890 状态也不再被破坏。
-> - **历史残留清理**：Tailscale stopped 时 networksetup 改不了它（exit=5），须在 Tailscale 运行时执行 multiplatform-content-pipeline 仓的 `scripts/fix_tailscale_proxy.sh`。
+> - **历史残留清理**：Tailscale stopped 时 networksetup 改不了它（exit=5），须在 Tailscale 运行时执行 content-pipeline 仓的 `scripts/fix_tailscale_proxy.sh`。
 > - **使用规则**：Tailscale 可常开、与采集共存；**不要开 exit node**；不要在探针正运行（Ethernet=8899）瞬间切换 Tailscale。
 
 ---

@@ -173,7 +173,7 @@ rm -rf ~/Library/Caches/*
 ### 6.4 开启 Tailscale 后断网（系统代理冲突，wj）
 1. **看 Tailscale 状态**：`tailscale status`（Running/Stopped）；`tailscale debug prefs` 查 ExitNodeID（应空）、CorpDNS、RouteAll
 2. **查各服务代理残留**：`networksetup -getsecurewebproxy Ethernet` 与 `networksetup -getsecurewebproxy Tailscale`，找指向已死端口（探针停后的 8899）的设置
-3. **清理（必须 Tailscale 运行时）**：启动 Tailscale（connected）→ 跑 multiplatform-content-pipeline 的 `scripts/fix_tailscale_proxy.sh`；Tailscale stopped 时 networksetup 改它会 exit=5
+3. **清理（必须 Tailscale 运行时）**：启动 Tailscale（connected）→ 跑 content-pipeline 的 `scripts/fix_tailscale_proxy.sh`；Tailscale stopped 时 networksetup 改它会 exit=5
 4. **根因预防**：探针只对物理 Ethernet 设代理并快照恢复、不碰 Tailscale；勿开 exit node；勿在探针运行（Ethernet=8899）时切换 Tailscale
 5. **全网断应急**：先在菜单栏停 Tailscale 恢复网络，再按上述清理
 
